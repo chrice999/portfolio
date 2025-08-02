@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linaharison Chrice - Développeur</title>
+    
+    <!-- CSS Externe -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Source Code Pro -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-gray-200">
+
+    <!-- Canvas pour l'arrière-plan 3D -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- HEADER & NAVIGATION -->
+    <header class="bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-700">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#accueil" class="text-xl font-bold text-white">L. Chrice</a>
+            <div class="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-300">
+                <a href="index.html#accueil" class="hover:text-blue-400 transition-colors">Accueil</a>
+                <a href="index.html#a-propos" class="hover:text-blue-400 transition-colors">À Propos</a>
+                <a href="index.html#competences" class="hover:text-blue-400 transition-colors">Compétences</a>
+                <a href="projets.html" class="hover:text-blue-400 transition-colors">Projets</a>
+                <a href="index.html#contact" class="hover:text-blue-400 transition-colors">Contact</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 relative z-10">
+        <!-- SECTION ACCUEIL (HERO) -->
+        <section id="accueil" class="min-h-[80vh] flex flex-col justify-center items-center text-center py-20 fade-in-section">
+            <div id="profile-pic-container">
+                <img id="profile-pic" src="img/profilpicture.png" alt="Photo de profil" class="w-40 h-40 mx-auto rounded-full object-cover mb-8 border-4 border-gray-800 shadow-lg" onerror="this.onerror=null;this.src='https://placehold.co/160x160/4A5568/E2E8F0?text=LC';">
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+                Salut, bienvenue je suis <br>
+                <span id="typing-text" class="text-blue-400"></span><span class="typing-cursor"></span>
+            </h1>
+            <p class="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-8">Étudiant en L3 Informatique, spécialisé en IA.</p>
+            <div class="flex justify-center space-x-6 mt-8">
+                <!-- Lien Gmail -->
+                <a href="mailto:votre.email@example.com" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-blue-400 transition-colors">
+                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                </a>
+                <!-- Lien Facebook -->
+                <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-blue-400 transition-colors">
+                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/></svg>
+                </a>
+            </div>
+        </section>
+        
+        <section id="a-propos" class="py-20 fade-in-section">
+            <h2 class="text-3xl font-bold text-center mb-6 text-white">À Propos de Moi</h2>
+            <p class="text-center max-w-3xl mx-auto text-gray-300">Avec un an d'expérience, je suis passionné par la résolution de problèmes et l'apprentissage continu. Le développement web me permet de créer, tandis que l'IA me pousse à innover. En dehors du code, je suis un grand lecteur et j'aime les jeux vidéo.</p>
+        </section>
+
+        <section id="competences" class="py-20 fade-in-section">
+            <h2 class="text-3xl font-bold text-center mb-12 text-white">Compétences</h2>
+            <div class="flex flex-wrap justify-center items-center gap-4 md:gap-6">
+                <span class="bg-gray-700 text-gray-300 px-4 py-2 rounded-full text-sm font-medium">HTML5</span>
+                <span class="bg-gray-700 text-gray-300 px-4 py-2 rounded-full text-sm font-medium">CSS3</span>
+                <span class="bg-gray-700 text-gray-300 px-4 py-2 rounded-full text-sm font-medium">JavaScript</span>
+                <span class="bg-gray-700 text-gray-300 px-4 py-2 rounded-full text-sm font-medium">Python</span>
+                <span class="bg-gray-700 text-gray-300 px-4 py-2 rounded-full text-sm font-medium">n8n</span>
+                <span class="bg-gray-700 text-gray-300 px-4 py-2 rounded-full text-sm font-medium">IA</span>
+                <span class="bg-gray-700 text-gray-300 px-4 py-2 rounded-full text-sm font-medium">Java</span>
+            </div>
+        </section>
+
+        <section id="contact" class="text-center py-20 fade-in-section">
+             <h2 class="text-3xl font-bold text-center mb-4 text-white">Contact</h2>
+             <p class="text-lg text-gray-300 mb-6 max-w-xl mx-auto">Ouvert aux opportunités et aux collaborations. Contactez-moi !</p>
+             <a href="mailto:votre.email@example.com" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-transform transform hover:scale-105">Envoyer un email</a>
+        </section>
+
+        <section class="text-center py-20 fade-in-section">
+            <p class="italic text-gray-400 mb-4">Pas intéressé ? Cliquez ici.</p>
+            <a href="next-page.html" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-lg transition-colors">
+                Suivant
+            </a>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-gray-700 py-6 relative z-10">
+        <div class="container mx-auto px-6 text-center text-gray-400"><p>&copy; <span id="year"></span> Linaharison Chrice. Tous droits réservés.</p></div>
+    </footer>
+
+    <!-- BOUTON RETOUR EN HAUT -->
+    <button id="scroll-to-top" class="hidden fixed bottom-5 right-5 bg-blue-600 hover:bg-blue-700 text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-opacity duration-300 z-20"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" /></svg></button>
+    
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- JavaScript Externe -->
+    <script src="script.js"></script>
+</body>
+</html>
