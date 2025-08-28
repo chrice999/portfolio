@@ -220,7 +220,7 @@
                 genderMale: "Garçon",
                 charDescLabel: "Description",
                 charDescPlaceholder: "Ex: Timide mais courageuse...",
-                chaptersLabel: "Nombre de Chapitres",
+                chaptersLabel: "Chapitre",
                 omniLabel: "Vue Omnisciente",
                 participantsLabel: "Nombre de Participants IA (2-6)",
                 startButton: "Lancer la Simulation",
@@ -258,7 +258,7 @@
                 genderMale: "Boy",
                 charDescLabel: "Description",
                 charDescPlaceholder: "E.g., Shy but brave, with a secret past...",
-                chaptersLabel: "Number of Chapters",
+                chaptersLabel: "Chapter",
                 omniLabel: "Omniscient View",
                 participantsLabel: "Number of AI Participants (2-6)",
                 startButton: "Start Simulation",
@@ -296,7 +296,7 @@
                 genderMale: "Chico",
                 charDescLabel: "Descripción",
                 charDescPlaceholder: "Ej: Tímida pero valiente, con un pasado secreto...",
-                chaptersLabel: "Número de Capítulos",
+                chaptersLabel: "Capítulo",
                 omniLabel: "Vista Omnisciente",
                 participantsLabel: "Número de Participantes de IA (2-6)",
                 startButton: "Iniciar Simulación",
@@ -334,7 +334,7 @@
                 genderMale: "男孩",
                 charDescLabel: "描述",
                 charDescPlaceholder: "例如：害羞但勇敢，有着秘密的过去...",
-                chaptersLabel: "章节数",
+                chaptersLabel: "章节",
                 omniLabel: "全知视角",
                 participantsLabel: "AI参与者人数（2-6）",
                 startButton: "开始模拟",
@@ -434,14 +434,17 @@
 
         function setupEventListeners() {
             dom.modeInput.addEventListener('change', updateUIForMode);
-            dom.newSimBtn.addEventListener('click', showSetupScreen);
+            dom.newSimBtn.addEventListener('click', () => {
+                showSetupScreen();
+                dom.sidebar.classList.remove('open'); // Auto-close sidebar on mobile
+            });
             dom.startButton.addEventListener('click', startNewSimulation);
             dom.sidebarToggle.addEventListener('click', () => dom.sidebar.classList.toggle('open'));
             dom.languageSwitcher.addEventListener('change', (e) => {
                 currentLanguage = e.target.value;
                 localStorage.setItem('iaSimLang', currentLanguage);
                 updateUIText();
-                renderSimulationsList(); // Re-render list with new lang if needed
+                renderSimulationsList();
             });
         }
 
@@ -519,7 +522,7 @@
                 }
             }
             
-            for (let i = Math.floor(startIndex / 2); i < currentSim.numChapters; i++) {
+            for (let i = Math.floor(startIndex / (currentSim.isSpectator ? 1 : 2)); i < currentSim.numChapters; i++) {
                 if(currentSim.isFinished) break;
 
                 await addMessageToHistory(CHAPTER_PROFILE, `${t('chaptersLabel')} ${i + 1}`);
@@ -529,9 +532,9 @@
                 const userChar = currentSim.personas.find(p => p.isUser);
 
                 if (currentSim.isSpectator) {
-                    storyPrompt = `Contexte:\n${historyText}\n\nEn tant que maître du jeu, continue l'histoire de manière épique et émotionnelle pour ce chapitre. Décris la scène et les actions des personnages. Les actions des personnages doivent être à la 3ème personne (ex: "ses joues devinrent rouges", "il tendit la main"). Réponds en ${t('langCode')}.`;
+                    storyPrompt = `Contexte:\n${historyText}\n\nEn tant que maître du jeu, continue l'histoire de manière épique et émotionnelle pour ce chapitre. Décris la scène et les actions des personnages. Les actions des personnages doivent être à la 3ème personne (ex: "ses joues devinrent rouges", "il tendit la main"). La narration pour ce chapitre ne doit pas dépasser 100 lignes. Réponds en ${t('langCode')}.`;
                 } else {
-                    storyPrompt = `Contexte:\n${historyText}\n\nContinue l'histoire style 'Dreame' pour ce chapitre (romance, tension, mystère, émotions fortes). Décris la scène, y compris les actions et émotions entre parenthèses (ex: *Il serre les poings*). Les actions des personnages IA doivent être à la 3ème personne. Propose 3 choix prenants pour ${userChar.name}. Formatte les choix comme ceci : [CHOIX 1: ...], [CHOIX 2: ...], [CHOIX 3: ...]. Réponds en ${t('langCode')}.`;
+                    storyPrompt = `Contexte:\n${historyText}\n\nContinue l'histoire style 'Dreame' pour ce chapitre (romance, tension, mystère, émotions fortes). Décris la scène, y compris les actions et émotions entre parenthèses (ex: *Il serre les poings*). Les actions des personnages IA doivent être à la 3ème personne. Propose 3 choix prenants pour ${userChar.name}. Formatte les choix comme ceci : [CHOIX 1: ...], [CHOIX 2: ...], [CHOIX 3: ...]. La narration pour ce chapitre ne doit pas dépasser 100 lignes. Réponds en ${t('langCode')}.`;
                 }
 
                 const storyResponse = await callGeminiAPI(storyPrompt);
@@ -891,4 +894,4 @@ Chaque objet doit avoir les clés "name", "role", "icon" (un emoji), et "persona
         initialize();
     </script>
 </body>
-</html>
+</ht
