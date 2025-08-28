@@ -40,7 +40,8 @@
             border-radius: 12px; box-shadow: var(--shadow);
             border: 1px solid var(--border-color); display: flex; flex-direction: column;
         }
-        .setup-screen, .debate-screen { padding: 20px; overflow-y: auto; flex-grow: 1; }
+        .setup-screen { padding: 20px; overflow-y: auto; flex-grow: 1; }
+        .debate-screen { padding: 20px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; }
         h1, h2 { text-align: center; color: var(--primary-color); margin-bottom: 20px; }
         .input-group { margin-bottom: 20px; }
         .input-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #b0b0b0; }
@@ -86,12 +87,19 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         #error-message { color: #cf6679; text-align: center; margin-top: 10px; display: none; }
         .hidden { display: none; }
-        #choices-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
+        #choices-container {
+            flex-shrink: 0;
+            padding: 20px 0;
+            margin-bottom: 60px; /* Espace pour la navigation gestuelle */
+        }
+        .choices-wrapper {
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
+        }
         .choice-btn {
             padding: 10px 15px; background-color: #2c2c2c; border: 1px solid var(--primary-color);
             color: var(--primary-color); border-radius: 20px; cursor: pointer;
         }
-        #custom-action-container { display: flex; gap: 10px; width: 100%; }
+        #custom-action-container { display: flex; gap: 10px; width: 100%; margin-top: 10px; }
         #custom-action-input { flex-grow: 1; }
         #sidebar-toggle {
             display: none; position: fixed; top: 10px; left: 10px; z-index: 1000;
@@ -186,7 +194,7 @@
         let currentLanguage = 'fr';
 
         const NARRATOR_PROFILE = { name: "Narrateur", role: "Omniscient", icon: "📖" };
-        const USER_PROFILE = { name: "Vous", role: "Protagoniste", icon: "👤" };
+        const USER_PROFILE = { name: "Toi", role: "Protagoniste", icon: "👤" };
         const CHAPTER_PROFILE = { name: "Chapitre", role: "Progression", icon: "🔖" };
 
         const translations = {
@@ -205,7 +213,7 @@
                 modeNarrator: "Débat avec Narrateur",
                 modeCreateChar: "Création Personnage",
                 modeDreame: "Histoire Interactive (Dreame)",
-                charNameLabel: "Nom de votre Personnage",
+                charNameLabel: "Nom de ton Personnage",
                 charNamePlaceholder: "Laissez vide pour le mode spectateur",
                 charGenderLabel: "Sexe",
                 genderFemale: "Fille",
@@ -222,10 +230,10 @@
                 conclusionTitle: "Conclusion",
                 conclusionSystem: "Système",
                 historyEnded: "Cette histoire est terminée.",
-                youAre: "Vous incarnez",
+                youAre: "Tu incarnes",
                 spectatorMode: "Mode spectateur activé. L'histoire se déroule...",
                 unexpectedEnd: "L'histoire semble être arrivée à une fin inattendue.",
-                customActionPlaceholder: "Ou écrivez votre propre action...",
+                customActionPlaceholder: "Ou écris ta propre action...",
                 sendButton: "Envoyer"
             },
             en: {
@@ -658,6 +666,9 @@ Chaque objet doit avoir les clés "name", "role", "icon" (un emoji), et "persona
         async function waitForUserChoice(choices, index) {
             return new Promise(resolve => {
                 dom.choicesContainer.innerHTML = '';
+                const wrapper = document.createElement('div');
+                wrapper.className = 'choices-wrapper';
+
                 choices.forEach(choiceText => {
                     const btn = document.createElement('button');
                     btn.className = 'choice-btn';
@@ -666,8 +677,9 @@ Chaque objet doit avoir les clés "name", "role", "icon" (un emoji), et "persona
                         dom.choicesContainer.innerHTML = '';
                         resolve(choiceText);
                     };
-                    dom.choicesContainer.appendChild(btn);
+                    wrapper.appendChild(btn);
                 });
+                dom.choicesContainer.appendChild(wrapper);
 
                 const customActionContainer = document.createElement('div');
                 customActionContainer.id = 'custom-action-container';
