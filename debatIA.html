@@ -423,7 +423,10 @@
 
             loadSimulationsFromStorage();
             renderSimulationsList();
-            if (savedSimulations.length > 0) {
+            const activeSimId = localStorage.getItem('activeSimId');
+            if (activeSimId && savedSimulations.some(s => s.id == activeSimId)) {
+                loadSimulation(parseInt(activeSimId, 10));
+            } else if (savedSimulations.length > 0) {
                 loadSimulation(savedSimulations[0].id);
             } else {
                 showSetupScreen();
@@ -478,6 +481,7 @@
                 const charName = dom.customCharNameInput.value.trim();
                 if (mode === 'dreame' && !charName) {
                     currentSim.isSpectator = true;
+                    currentSim.isOmniscient = true; // Force omniscient in spectator mode
                 } else {
                     currentSim.customChar = {
                         name: charName || t('charNamePlaceholder'),
@@ -486,7 +490,7 @@
                     };
                 }
             }
-            if (mode === 'dreame') {
+            if (mode === 'dreame' && !currentSim.isSpectator) {
                 currentSim.isOmniscient = dom.dreameOmniCheckbox.checked;
             }
             
@@ -616,7 +620,8 @@
             const personaDescription = personaTypes[mode] || "participants";
 
             const prompt = `Crée ${finalNumIAs} profils de ${personaDescription} pour une simulation sur "${finalTopic}". ${userCharPrompt}
-IMPORTANT: Ta réponse DOIT être uniquement un objet JSON valide, sans texte d'introduction, explications ou formatage markdown. La structure doit être une liste de ${finalNumIAs} objets.
+IMPORTANT: L'histoire doit être entièrement originale et ne doit PAS inclure de personnages ou d'univers existants (comme Mario, Harry Potter, etc.). Reste strictement dans le genre demandé.
+Ta réponse DOIT être uniquement un objet JSON valide, sans texte d'introduction, explications ou formatage markdown. La structure doit être une liste de ${finalNumIAs} objets.
 Chaque objet doit avoir les clés "name", "role", "icon" (un emoji), et "persona". Réponds en ${t('langCode')}.`;
             
             const responseText = await callGeminiAPI(prompt);
@@ -745,10 +750,13 @@ Chaque objet doit avoir les clés "name", "role", "icon" (un emoji), et "persona
                 isTyping = true;
                 let i = 0;
                 function typing() {
+                    const isUserAtBottom = dom.conversationDiv.scrollHeight - dom.conversationDiv.scrollTop <= dom.conversationDiv.clientHeight + 50;
                     if (i < text.length) {
                         element.innerHTML += text.charAt(i).replace(/\n/g, '<br>');
                         i++;
-                        dom.conversationDiv.scrollTop = dom.conversationDiv.scrollHeight;
+                        if (isUserAtBottom) {
+                            dom.conversationDiv.scrollTop = dom.conversationDiv.scrollHeight;
+                        }
                         setTimeout(typing, 35);
                     } else {
                         isTyping = false;
@@ -786,6 +794,8 @@ Chaque objet doit avoir les clés "name", "role", "icon" (un emoji), et "persona
             const p = messageEl.querySelector('p');
             if (profile.name !== CHAPTER_PROFILE.name) {
                 await typewriterEffect(p, text);
+            } else {
+                 dom.conversationDiv.scrollTop = dom.conversationDiv.scrollHeight;
             }
         }
         
@@ -793,6 +803,7 @@ Chaque objet doit avoir les clés "name", "role", "icon" (un emoji), et "persona
             dom.debateScreen.classList.add('hidden');
             dom.setupScreen.classList.remove('hidden');
             currentSim = null;
+            localStorage.removeItem('activeSimId');
             renderSimulationsList();
         }
 
@@ -809,7 +820,8 @@ Chaque objet doit avoir les clés "name", "role", "icon" (un emoji), et "persona
             const sim = savedSimulations.find(s => s.id === id);
             if (!sim) return;
             currentSim = sim;
-            currentLanguage = sim.lang || 'fr'; // Load language from sim
+            localStorage.setItem('activeSimId', id);
+            currentLanguage = sim.lang || 'fr';
             dom.languageSwitcher.value = currentLanguage;
             updateUIText();
             showDebateScreen();
@@ -841,8 +853,12 @@ Chaque objet doit avoir les clés "name", "role", "icon" (un emoji), et "persona
             dom.choicesContainer.innerHTML = '';
             if (sim.isFinished) {
                 dom.choicesContainer.innerHTML = `<p>${t('historyEnded')}</p>`;
-            } else if (sim.mode === 'dreame' && !sim.isSpectator) {
-                runDreameMode(sim.history.length);
+            } else if (sim.history.length > 0 && !isTyping) {
+                 if (sim.mode === 'dreame' && !sim.isSpectator) {
+                    runDreameMode(sim.history.length);
+                } else if (sim.mode === 'dreame' && sim.isSpectator) {
+                    runDreameMode(sim.history.length);
+                }
             }
             renderSimulationsList();
         }
@@ -861,6 +877,7 @@ Chaque objet doit avoir les clés "name", "role", "icon" (un emoji), et "persona
             if (currentSim) {
                 const index = savedSimulations.findIndex(s => s.id === currentSim.id);
                 if (index !== -1) savedSimulations[index] = currentSim;
+                localStorage.setItem('activeSimId', currentSim.id);
             }
             localStorage.setItem('iaSimulations', JSON.stringify(savedSimulations));
         }
@@ -875,7 +892,7 @@ Chaque objet doit avoir les clés "name", "role", "icon" (un emoji), et "persona
             savedSimulations.forEach(sim => {
                 const li = document.createElement('li');
                 li.dataset.id = sim.id;
-                if (currentSim && sim.id === currentSim.id) li.classList.add('active');
+                if (currentSim && sim.id === sim.id) li.classList.add('active');
                 
                 const textSpan = document.createElement('span');
                 const modeName = translations[sim.lang || 'fr'][`mode${sim.mode.charAt(0).toUpperCase() + sim.mode.slice(1)}`];
