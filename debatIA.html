@@ -134,7 +134,11 @@
             <p style="text-align:center; color: #b0b0b0;">L'IA crée les débatteurs en fonction de votre sujet.</p>
             <div class="input-group">
                 <label for="topic">Sujet du Débat</label>
-                <input type="text" id="topic" placeholder="Le pokemon le plus fort ...">
+                <input type="text" id="topic" placeholder="Ex : La pokemon la plus fort...">
+            </div>
+            <div class="input-group">
+                <label for="numIAs">Nombre de Débatteurs (2-6)</label>
+                <input type="number" id="numIAs" value="4" min="2" max="6" style="-moz-appearance: textfield;">
             </div>
             <button class="btn" id="startButton">Lancer le Débat</button>
             <p id="error-message"></p>
@@ -153,6 +157,7 @@
     <script>
         const startButton = document.getElementById('startButton');
         const topicInput = document.getElementById('topic');
+        const numIAsInput = document.getElementById('numIAs');
         const setupScreen = document.getElementById('setupScreen');
         const debateScreen = document.getElementById('debateScreen');
         const conversationDiv = document.getElementById('conversation');
@@ -168,9 +173,15 @@
 
         startButton.addEventListener('click', async () => {
             const topic = topicInput.value.trim();
+            const numIAs = parseInt(numIAsInput.value, 10);
 
             if (!topic) {
                 errorMessage.textContent = "Veuillez fournir un sujet.";
+                errorMessage.style.display = 'block';
+                return;
+            }
+            if (isNaN(numIAs) || numIAs < 2 || numIAs > 6) {
+                errorMessage.textContent = "Veuillez choisir un nombre de débatteurs entre 2 et 6.";
                 errorMessage.style.display = 'block';
                 return;
             }
@@ -180,7 +191,7 @@
             debateScreen.style.display = 'block';
             debateTitle.textContent = `Débat : ${topic}`;
             
-            await runDebate(topic);
+            await runDebate(topic, numIAs);
         });
 
         async function callGeminiAPI(prompt) {
@@ -245,8 +256,8 @@
             await typewriterEffect(p, text);
         }
 
-        async function generatePersonas(topic) {
-            const prompt = `En te basant sur le sujet de débat suivant : "${topic}", crée 4 profils de débatteurs uniques et créatifs. Retourne le résultat sous forme d'un objet JSON valide (une liste de 4 objets). Chaque objet doit avoir les clés "name", "role", "icon" (un emoji), et "persona".`;
+        async function generatePersonas(topic, numIAs) {
+            const prompt = `En te basant sur le sujet de débat suivant : "${topic}", crée ${numIAs} profils de débatteurs uniques et créatifs. Retourne le résultat sous forme d'un objet JSON valide (une liste de ${numIAs} objets). Chaque objet doit avoir les clés "name", "role", "icon" (un emoji), et "persona".`;
             const responseText = await callGeminiAPI(prompt);
             try {
                 const jsonMatch = responseText.match(/\[.*\]/s);
@@ -264,11 +275,11 @@
             }
         }
 
-        async function runDebate(topic) {
+        async function runDebate(topic, numIAs) {
             conversationHistory = `Sujet du débat : ${topic}\n\n`;
             
             // Étape 0: Génération des personas
-            dynamicProfiles = await generatePersonas(topic);
+            dynamicProfiles = await generatePersonas(topic, numIAs);
             if (!dynamicProfiles) return;
 
             // Étape 1: Présentations
