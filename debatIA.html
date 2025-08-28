@@ -131,7 +131,7 @@
         </div>
     </div>
 
-    <div class="main-content">
+    <div class="main-content" id="mainContent">
         <div class="container">
             <div class="setup-screen" id="setupScreen">
                 <h1 id="setup-title"></h1>
@@ -355,6 +355,7 @@
         const dom = {
             sidebar: document.getElementById('sidebar'),
             sidebarToggle: document.getElementById('sidebar-toggle'),
+            mainContent: document.getElementById('mainContent'),
             startButton: document.getElementById('startButton'),
             topicInput: document.getElementById('topic'),
             numIAsInput: document.getElementById('numIAs'),
@@ -436,10 +437,15 @@
             dom.modeInput.addEventListener('change', updateUIForMode);
             dom.newSimBtn.addEventListener('click', () => {
                 showSetupScreen();
-                dom.sidebar.classList.remove('open'); // Auto-close sidebar on mobile
+                dom.sidebar.classList.remove('open');
             });
             dom.startButton.addEventListener('click', startNewSimulation);
             dom.sidebarToggle.addEventListener('click', () => dom.sidebar.classList.toggle('open'));
+            dom.mainContent.addEventListener('click', () => {
+                if (dom.sidebar.classList.contains('open')) {
+                    dom.sidebar.classList.remove('open');
+                }
+            });
             dom.languageSwitcher.addEventListener('change', (e) => {
                 currentLanguage = e.target.value;
                 localStorage.setItem('iaSimLang', currentLanguage);
@@ -894,4 +900,4 @@ Chaque objet doit avoir les clés "name", "role", "icon" (un emoji), et "persona
         initialize();
     </script>
 </body>
-</ht
+</html>
