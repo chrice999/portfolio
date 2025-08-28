@@ -9,34 +9,38 @@
             --bg-color: #121212; --card-bg: #1e1e1e; --text-color: #e0e0e0;
             --primary-color: #bb86fc; --border-color: #333; --shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
         }
+        html, body { height: 100%; margin: 0; overflow: hidden; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color); color: var(--text-color); margin: 0;
-            display: flex; height: 100vh;
+            background-color: var(--bg-color); color: var(--text-color);
+            display: flex;
         }
         #sidebar {
             width: 250px; background-color: #181818; padding: 20px;
             display: flex; flex-direction: column; border-right: 1px solid var(--border-color);
+            transition: transform 0.3s ease; box-sizing: border-box;
         }
         #sidebar h2 { color: var(--primary-color); margin-top: 0; }
         #saved-simulations { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex-grow: 1; }
         #saved-simulations li {
             padding: 10px; margin-bottom: 10px; border-radius: 8px; cursor: pointer;
             background-color: #2c2c2c; transition: background-color 0.3s; white-space: nowrap;
-            overflow: hidden; text-overflow: ellipsis;
+            overflow: hidden; text-overflow: ellipsis; display: flex; justify-content: space-between; align-items: center;
         }
         #saved-simulations li:hover, #saved-simulations li.active { background-color: var(--primary-color); color: #000; }
+        .delete-sim-btn { background: none; border: none; color: #999; cursor: pointer; font-size: 18px; }
+        .delete-sim-btn:hover { color: #ff6b6b; }
         #new-sim-btn {
             padding: 12px; background-color: var(--primary-color); color: #000; border: none;
             border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px;
         }
-        .main-content { flex-grow: 1; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .main-content { flex-grow: 1; display: flex; justify-content: center; align-items: center; padding: 10px; height: 100vh; box-sizing: border-box; }
         .container {
-            width: 100%; max-width: 800px; background: var(--card-bg);
-            border-radius: 12px; box-shadow: var(--shadow); overflow: hidden;
-            border: 1px solid var(--border-color);
+            width: 100%; height: 100%; max-width: 800px; background: var(--card-bg);
+            border-radius: 12px; box-shadow: var(--shadow);
+            border: 1px solid var(--border-color); display: flex; flex-direction: column;
         }
-        .setup-screen, .debate-screen { padding: 30px; }
+        .setup-screen, .debate-screen { padding: 20px; overflow-y: auto; flex-grow: 1; }
         h1, h2 { text-align: center; color: var(--primary-color); margin-bottom: 20px; }
         .input-group { margin-bottom: 20px; }
         .input-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #b0b0b0; }
@@ -50,19 +54,28 @@
             color: #000; border: none; border-radius: 8px; font-size: 18px;
             font-weight: bold; cursor: pointer; transition: background-color 0.3s;
         }
-        #conversation { margin-top: 20px; max-height: 60vh; overflow-y: auto; padding-right: 15px; }
+        #conversation { margin-top: 20px; overflow-y: auto; padding-right: 15px; flex-grow: 1; }
         .message {
             margin-bottom: 15px; padding: 12px; border-radius: 18px; line-height: 1.4;
             display: flex; align-items: flex-start; background-color: #2c2c2c;
             opacity: 0; transform: translateY(20px); animation: fadeIn 0.5s forwards;
         }
         .narrator { background-color: transparent; border: 1px dashed #666; font-style: italic; color: #aaa; }
-        .user-choice { background-color: rgba(187, 134, 252, 0.2); text-align: center; font-style: italic; }
+        .user-choice { background-color: rgba(187, 134, 252, 0.2); position: relative; }
+        .chapter-break {
+            background-color: transparent; text-align: center; font-weight: bold;
+            color: var(--primary-color); margin: 25px 0;
+        }
+        .rewind-btn {
+            position: absolute; top: 5px; right: 10px; background: none; border: none;
+            color: #aaa; cursor: pointer; font-size: 18px;
+        }
+        .rewind-btn:hover { color: var(--primary-color); }
         @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
         .message .icon { font-size: 24px; margin-right: 12px; }
         .message .content { flex: 1; }
         .message strong { display: block; margin-bottom: 4px; color: var(--primary-color); }
-        .message p { margin: 0; }
+        .message p { margin: 0; white-space: pre-wrap; }
         .final-summary { background-color: rgba(187, 134, 252, 0.1); padding: 20px; border: 1px solid var(--primary-color); border-radius: 8px; margin-top: 20px;}
         #loader { text-align: center; padding: 20px; display: none; }
         .spinner {
@@ -78,57 +91,78 @@
             padding: 10px 15px; background-color: #2c2c2c; border: 1px solid var(--primary-color);
             color: var(--primary-color); border-radius: 20px; cursor: pointer;
         }
+        #custom-action-container { display: flex; gap: 10px; width: 100%; }
+        #custom-action-input { flex-grow: 1; }
+        #sidebar-toggle {
+            display: none; position: fixed; top: 10px; left: 10px; z-index: 1000;
+            background: var(--primary-color); color: #000; border: none; border-radius: 50%;
+            width: 40px; height: 40px; font-size: 24px; cursor: pointer;
+        }
+        @media (max-width: 768px) {
+            #sidebar { position: fixed; transform: translateX(-100%); z-index: 999; height: 100%; }
+            #sidebar.open { transform: translateX(0); }
+            #sidebar-toggle { display: block; }
+            .main-content { padding: 10px; }
+        }
     </style>
 </head>
 <body>
-
+    <button id="sidebar-toggle">☰</button>
     <div id="sidebar">
-        <h2>Mes Simulations</h2>
+        <h2 id="sidebar-title"></h2>
         <ul id="saved-simulations"></ul>
-        <button id="new-sim-btn">Nouvelle Simulation</button>
+        <button id="new-sim-btn"></button>
+        <div class="input-group" style="margin-top: auto;">
+            <label for="language-switcher" id="language-label"></label>
+            <select id="language-switcher">
+                <option value="fr">Français</option>
+                <option value="en">English</option>
+                <option value="es">Español</option>
+                <option value="zh">中文</option>
+            </select>
+        </div>
     </div>
 
     <div class="main-content">
         <div class="container">
             <div class="setup-screen" id="setupScreen">
-                <h1>Nouvelle Simulation</h1>
+                <h1 id="setup-title"></h1>
+                <p id="setup-subtitle" style="text-align:center; color: #b0b0b0;"></p>
                 <div class="input-group">
-                    <label for="topic">Sujet</label>
-                    <input type="text" id="topic" placeholder="Ex: Romance avec un Alpha mystérieux">
+                    <label for="topic" id="topic-label"></label>
+                    <input type="text" id="topic">
                 </div>
                 <div class="input-group">
-                    <label for="simulationMode">Mode de Simulation</label>
+                    <label for="simulationMode" id="mode-label"></label>
                     <select id="simulationMode">
-                        <option value="debate">Débat Classique</option>
-                        <option value="acting">Jeu d'acteur</option>
-                        <option value="narrator">Débat avec Narrateur</option>
-                        <option value="brainstorming">Brainstorming</option>
-                        <option value="trial">Procès Fictif</option>
-                        <option value="negotiation">Négociation</option>
-                        <option value="interview">Interview d'Expert</option>
-                        <option value="create_char">Création Personnage</option>
-                        <option value="dreame">Histoire Interactive (Dreame)</option>
+                        <option value="debate" id="mode-debate"></option>
+                        <option value="acting" id="mode-acting"></option>
+                        <option value="narrator" id="mode-narrator"></option>
+                        <option value="create_char" id="mode-create_char"></option>
+                        <option value="dreame" id="mode-dreame"></option>
                     </select>
                 </div>
                 <div id="custom-char-group" class="input-group hidden">
-                    <label for="custom-char-name">Nom de votre Personnage</label>
+                    <label for="custom-char-name" id="char-name-label"></label>
                     <input type="text" id="custom-char-name">
-                    <label for="custom-char-gender" style="margin-top:10px;">Sexe</label>
+                    <label for="custom-char-gender" style="margin-top:10px;" id="char-gender-label"></label>
                     <select id="custom-char-gender">
-                        <option value="Fille">Fille</option>
-                        <option value="Garçon">Garçon</option>
+                        <option value="Fille" id="gender-female"></option>
+                        <option value="Garçon" id="gender-male"></option>
                     </select>
-                    <label for="custom-char-desc" style="margin-top:10px;">Description</label>
-                    <textarea id="custom-char-desc" rows="3" placeholder="Ex: Timide mais courageuse, avec un passé secret..."></textarea>
+                    <label for="custom-char-desc" style="margin-top:10px;" id="char-desc-label"></label>
+                    <textarea id="custom-char-desc" rows="3"></textarea>
                 </div>
                  <div id="dreame-options-group" class="input-group hidden">
-                    <label><input type="checkbox" id="dreame-omni"> Vue Omnisciente (voir les pensées des autres)</label>
+                    <label for="num-chapters" id="chapters-label"></label>
+                    <input type="number" id="num-chapters" value="5" min="1" max="20">
+                    <label style="margin-top:10px;"><input type="checkbox" id="dreame-omni"> <span id="omni-label"></span></label>
                 </div>
                 <div class="input-group" id="num-ias-group">
-                    <label for="numIAs">Nombre de Participants IA (2-6)</label>
+                    <label for="numIAs" id="participants-label"></label>
                     <input type="number" id="numIAs" value="4" min="2" max="6">
                 </div>
-                <button class="btn" id="startButton">Lancer la Simulation</button>
+                <button class="btn" id="startButton"></button>
                 <p id="error-message"></p>
             </div>
 
@@ -138,44 +172,246 @@
                 <div id="choices-container"></div>
                 <div id="loader">
                     <div class="spinner"></div>
-                    <p>IA en cours de réflexion...</p>
+                    <p id="loader-text"></p>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- ELEMENTS DOM ---
-        const startButton = document.getElementById('startButton');
-        const topicInput = document.getElementById('topic');
-        const numIAsInput = document.getElementById('numIAs');
-        const numIAsGroup = document.getElementById('num-ias-group');
-        const modeInput = document.getElementById('simulationMode');
-        const setupScreen = document.getElementById('setupScreen');
-        const debateScreen = document.getElementById('debateScreen');
-        const conversationDiv = document.getElementById('conversation');
-        const loader = document.getElementById('loader');
-        const debateTitle = document.getElementById('debateTitle');
-        const errorMessage = document.getElementById('error-message');
-        const customCharGroup = document.getElementById('custom-char-group');
-        const customCharNameInput = document.getElementById('custom-char-name');
-        const customCharGenderInput = document.getElementById('custom-char-gender');
-        const customCharDescInput = document.getElementById('custom-char-desc');
-        const dreameOptionsGroup = document.getElementById('dreame-options-group');
-        const dreameOmniCheckbox = document.getElementById('dreame-omni');
-        const choicesContainer = document.getElementById('choices-container');
-        const savedSimsList = document.getElementById('saved-simulations');
-        const newSimBtn = document.getElementById('new-sim-btn');
-
-        // --- ETAT DE L'APPLICATION ---
-        const geminiApiKey = "AIzaSyAQYBigpd1Yvbrc-gz12jVROUKH1p2pKDY";
+        const geminiApiKey = "AIzaSyCStPfglyB9axkx3cUYkLfrdRcQlzBYIAc";
         let savedSimulations = [];
         let currentSim = null;
-        const NARRATOR_PROFILE = { name: "Narrateur", role: "Omniscient", icon: "📖", persona: "..." };
-        const USER_PROFILE = { name: "Vous", role: "Protagoniste", icon: "👤" };
+        let isTyping = false;
+        let currentLanguage = 'fr';
 
-        // --- INITIALISATION ---
+        const NARRATOR_PROFILE = { name: "Narrateur", role: "Omniscient", icon: "📖" };
+        const USER_PROFILE = { name: "Vous", role: "Protagoniste", icon: "👤" };
+        const CHAPTER_PROFILE = { name: "Chapitre", role: "Progression", icon: "🔖" };
+
+        const translations = {
+            fr: {
+                langCode: "français",
+                sidebarTitle: "Mes Simulations",
+                newSimButton: "Nouvelle Simulation",
+                languageLabel: "Langue",
+                setupTitle: "Nouvelle Simulation",
+                setupSubtitle: "L'IA crée les participants en fonction de votre sujet.",
+                topicLabel: "Sujet (ou laissez vide pour un titre surprise)",
+                topicPlaceholder: "Ex: Romance avec un Alpha mystérieux",
+                modeLabel: "Mode de Simulation",
+                modeDebate: "Débat Classique",
+                modeActing: "Jeu d'acteur",
+                modeNarrator: "Débat avec Narrateur",
+                modeCreateChar: "Création Personnage",
+                modeDreame: "Histoire Interactive (Dreame)",
+                charNameLabel: "Nom de votre Personnage",
+                charNamePlaceholder: "Laissez vide pour le mode spectateur",
+                charGenderLabel: "Sexe",
+                genderFemale: "Fille",
+                genderMale: "Garçon",
+                charDescLabel: "Description",
+                charDescPlaceholder: "Ex: Timide mais courageuse...",
+                chaptersLabel: "Nombre de Chapitres",
+                omniLabel: "Vue Omnisciente",
+                participantsLabel: "Nombre de Participants IA (2-6)",
+                startButton: "Lancer la Simulation",
+                loaderText: "IA en cours de réflexion...",
+                errorTopic: "Veuillez fournir un sujet.",
+                errorParticipants: "L'IA n'a pas pu créer les participants.",
+                conclusionTitle: "Conclusion",
+                conclusionSystem: "Système",
+                historyEnded: "Cette histoire est terminée.",
+                youAre: "Vous incarnez",
+                spectatorMode: "Mode spectateur activé. L'histoire se déroule...",
+                unexpectedEnd: "L'histoire semble être arrivée à une fin inattendue.",
+                customActionPlaceholder: "Ou écrivez votre propre action...",
+                sendButton: "Envoyer"
+            },
+            en: {
+                langCode: "english",
+                sidebarTitle: "My Simulations",
+                newSimButton: "New Simulation",
+                languageLabel: "Language",
+                setupTitle: "New Simulation",
+                setupSubtitle: "The AI creates participants based on your topic.",
+                topicLabel: "Topic (or leave blank for a surprise title)",
+                topicPlaceholder: "E.g., Romance with a mysterious Alpha",
+                modeLabel: "Simulation Mode",
+                modeDebate: "Classic Debate",
+                modeActing: "Role-playing Scene",
+                modeNarrator: "Debate with Narrator",
+                modeCreateChar: "Character Creation",
+                modeDreame: "Interactive Story (Dreame)",
+                charNameLabel: "Your Character's Name",
+                charNamePlaceholder: "Leave blank for spectator mode",
+                charGenderLabel: "Gender",
+                genderFemale: "Girl",
+                genderMale: "Boy",
+                charDescLabel: "Description",
+                charDescPlaceholder: "E.g., Shy but brave, with a secret past...",
+                chaptersLabel: "Number of Chapters",
+                omniLabel: "Omniscient View",
+                participantsLabel: "Number of AI Participants (2-6)",
+                startButton: "Start Simulation",
+                loaderText: "AI is thinking...",
+                errorTopic: "Please provide a topic.",
+                errorParticipants: "The AI could not create the participants.",
+                conclusionTitle: "Conclusion",
+                conclusionSystem: "System",
+                historyEnded: "This story has ended.",
+                youAre: "You are playing as",
+                spectatorMode: "Spectator mode activated. The story unfolds...",
+                unexpectedEnd: "The story seems to have reached an unexpected end.",
+                customActionPlaceholder: "Or write your own action...",
+                sendButton: "Send"
+            },
+            es: {
+                langCode: "español",
+                sidebarTitle: "Mis Simulaciones",
+                newSimButton: "Nueva Simulación",
+                languageLabel: "Idioma",
+                setupTitle: "Nueva Simulación",
+                setupSubtitle: "La IA crea participantes basados en tu tema.",
+                topicLabel: "Tema (o déjalo en blanco para un título sorpresa)",
+                topicPlaceholder: "Ej: Romance con un Alfa misterioso",
+                modeLabel: "Modo de Simulación",
+                modeDebate: "Debate Clásico",
+                modeActing: "Escena de Rol",
+                modeNarrator: "Debate con Narrador",
+                modeCreateChar: "Creación de Personaje",
+                modeDreame: "Historia Interactiva (Dreame)",
+                charNameLabel: "Nombre de tu Personaje",
+                charNamePlaceholder: "Dejar en blanco para modo espectador",
+                charGenderLabel: "Género",
+                genderFemale: "Chica",
+                genderMale: "Chico",
+                charDescLabel: "Descripción",
+                charDescPlaceholder: "Ej: Tímida pero valiente, con un pasado secreto...",
+                chaptersLabel: "Número de Capítulos",
+                omniLabel: "Vista Omnisciente",
+                participantsLabel: "Número de Participantes de IA (2-6)",
+                startButton: "Iniciar Simulación",
+                loaderText: "La IA está pensando...",
+                errorTopic: "Por favor, proporciona un tema.",
+                errorParticipants: "La IA no pudo crear los participantes.",
+                conclusionTitle: "Conclusión",
+                conclusionSystem: "Sistema",
+                historyEnded: "Esta historia ha terminado.",
+                youAre: "Estás jugando como",
+                spectatorMode: "Modo espectador activado. La historia se desarrolla...",
+                unexpectedEnd: "La historia parece haber llegado a un final inesperado.",
+                customActionPlaceholder: "O escribe tu propia acción...",
+                sendButton: "Enviar"
+            },
+            zh: {
+                langCode: "中文",
+                sidebarTitle: "我的模拟",
+                newSimButton: "新的模拟",
+                languageLabel: "语言",
+                setupTitle: "新的模拟",
+                setupSubtitle: "AI根据您的主题创建参与者。",
+                topicLabel: "主题（或留空以获得惊喜标题）",
+                topicPlaceholder: "例如：与神秘阿尔法的浪漫史",
+                modeLabel: "模拟模式",
+                modeDebate: "经典辩论",
+                modeActing: "角色扮演场景",
+                modeNarrator: "带叙述者的辩论",
+                modeCreateChar: "角色创建",
+                modeDreame: "互动故事（Dreame）",
+                charNameLabel: "你的角色名字",
+                charNamePlaceholder: "旁观者模式请留空",
+                charGenderLabel: "性别",
+                genderFemale: "女孩",
+                genderMale: "男孩",
+                charDescLabel: "描述",
+                charDescPlaceholder: "例如：害羞但勇敢，有着秘密的过去...",
+                chaptersLabel: "章节数",
+                omniLabel: "全知视角",
+                participantsLabel: "AI参与者人数（2-6）",
+                startButton: "开始模拟",
+                loaderText: "AI正在思考中...",
+                errorTopic: "请输入一个主题。",
+                errorParticipants: "AI无法创建参与者。",
+                conclusionTitle: "结论",
+                conclusionSystem: "系统",
+                historyEnded: "这个故事已经结束了。",
+                youAre: "您扮演的是",
+                spectatorMode: "观察者模式已激活。故事正在展开...",
+                unexpectedEnd: "故事似乎已经走到了意想不到的结局。",
+                customActionPlaceholder: "或者写下你自己的行动...",
+                sendButton: "发送"
+            }
+        };
+
+        const dom = {
+            sidebar: document.getElementById('sidebar'),
+            sidebarToggle: document.getElementById('sidebar-toggle'),
+            startButton: document.getElementById('startButton'),
+            topicInput: document.getElementById('topic'),
+            numIAsInput: document.getElementById('numIAs'),
+            numIAsGroup: document.getElementById('num-ias-group'),
+            numChaptersInput: document.getElementById('num-chapters'),
+            modeInput: document.getElementById('simulationMode'),
+            setupScreen: document.getElementById('setupScreen'),
+            debateScreen: document.getElementById('debateScreen'),
+            conversationDiv: document.getElementById('conversation'),
+            loader: document.getElementById('loader'),
+            debateTitle: document.getElementById('debateTitle'),
+            errorMessage: document.getElementById('error-message'),
+            customCharGroup: document.getElementById('custom-char-group'),
+            customCharNameInput: document.getElementById('custom-char-name'),
+            customCharGenderInput: document.getElementById('custom-char-gender'),
+            customCharDescInput: document.getElementById('custom-char-desc'),
+            dreameOptionsGroup: document.getElementById('dreame-options-group'),
+            dreameOmniCheckbox: document.getElementById('dreame-omni'),
+            choicesContainer: document.getElementById('choices-container'),
+            savedSimsList: document.getElementById('saved-simulations'),
+            newSimBtn: document.getElementById('new-sim-btn'),
+            languageSwitcher: document.getElementById('language-switcher'),
+        };
+
+        function t(key) {
+            return translations[currentLanguage][key] || translations['en'][key];
+        }
+
+        function updateUIText() {
+            document.documentElement.lang = currentLanguage;
+            // Sidebar
+            dom.sidebar.querySelector('h2').textContent = t('sidebarTitle');
+            dom.newSimBtn.textContent = t('newSimButton');
+            document.getElementById('language-label').textContent = t('languageLabel');
+            // Setup Screen
+            dom.setupScreen.querySelector('h1').textContent = t('setupTitle');
+            document.getElementById('setup-subtitle').textContent = t('setupSubtitle');
+            document.getElementById('topic-label').textContent = t('topicLabel');
+            dom.topicInput.placeholder = t('topicPlaceholder');
+            document.getElementById('mode-label').textContent = t('modeLabel');
+            document.getElementById('mode-debate').textContent = t('modeDebate');
+            document.getElementById('mode-acting').textContent = t('modeActing');
+            document.getElementById('mode-narrator').textContent = t('modeNarrator');
+            document.getElementById('mode-create_char').textContent = t('modeCreateChar');
+            document.getElementById('mode-dreame').textContent = t('modeDreame');
+            document.getElementById('char-name-label').textContent = t('charNameLabel');
+            dom.customCharNameInput.placeholder = t('charNamePlaceholder');
+            document.getElementById('char-gender-label').textContent = t('charGenderLabel');
+            document.getElementById('gender-female').textContent = t('genderFemale');
+            document.getElementById('gender-male').textContent = t('genderMale');
+            document.getElementById('char-desc-label').textContent = t('charDescLabel');
+            dom.customCharDescInput.placeholder = t('charDescPlaceholder');
+            document.getElementById('chapters-label').textContent = t('chaptersLabel');
+            document.getElementById('omni-label').textContent = t('omniLabel');
+            document.getElementById('participants-label').textContent = t('participantsLabel');
+            dom.startButton.textContent = t('startButton');
+            // Debate Screen
+            dom.loader.querySelector('p').textContent = t('loaderText');
+        }
+
         function initialize() {
+            const savedLang = localStorage.getItem('iaSimLang') || navigator.language.split('-')[0];
+            currentLanguage = translations[savedLang] ? savedLang : 'en';
+            dom.languageSwitcher.value = currentLanguage;
+
             loadSimulationsFromStorage();
             renderSimulationsList();
             if (savedSimulations.length > 0) {
@@ -184,195 +420,285 @@
                 showSetupScreen();
             }
             updateUIForMode();
+            setupEventListeners();
+            updateUIText();
         }
 
-        // --- GESTION DES EVENEMENTS ---
-        modeInput.addEventListener('change', updateUIForMode);
-        newSimBtn.addEventListener('click', showSetupScreen);
-        startButton.addEventListener('click', startNewSimulation);
+        function setupEventListeners() {
+            dom.modeInput.addEventListener('change', updateUIForMode);
+            dom.newSimBtn.addEventListener('click', showSetupScreen);
+            dom.startButton.addEventListener('click', startNewSimulation);
+            dom.sidebarToggle.addEventListener('click', () => dom.sidebar.classList.toggle('open'));
+            dom.languageSwitcher.addEventListener('change', (e) => {
+                currentLanguage = e.target.value;
+                localStorage.setItem('iaSimLang', currentLanguage);
+                updateUIText();
+                renderSimulationsList(); // Re-render list with new lang if needed
+            });
+        }
 
         function updateUIForMode() {
-            const mode = modeInput.value;
-            customCharGroup.classList.toggle('hidden', mode !== 'create_char' && mode !== 'dreame');
-            dreameOptionsGroup.classList.toggle('hidden', mode !== 'dreame');
-            numIAsGroup.classList.toggle('hidden', mode === 'dreame');
+            const mode = dom.modeInput.value;
+            dom.customCharGroup.classList.toggle('hidden', mode !== 'create_char' && mode !== 'dreame');
+            dom.dreameOptionsGroup.classList.toggle('hidden', mode !== 'dreame');
+            dom.numIAsGroup.classList.toggle('hidden', mode === 'dreame');
         }
 
         async function startNewSimulation() {
-            const topic = topicInput.value.trim();
-            const mode = modeInput.value;
-            const numIAs = (mode === 'dreame') ? 3 : parseInt(numIAsInput.value, 10); // Dreame a un nombre fixe d'IA
+            let topic = dom.topicInput.value.trim();
+            const mode = dom.modeInput.value;
+            const numIAs = (mode === 'dreame') ? 3 : parseInt(dom.numIAsInput.value, 10);
+            const numChapters = parseInt(dom.numChaptersInput.value, 10);
 
-            if (!topic) {
-                errorMessage.textContent = "Veuillez fournir un sujet.";
-                errorMessage.style.display = 'block';
-                return;
-            }
-            errorMessage.style.display = 'none';
+            dom.errorMessage.style.display = 'none';
 
             currentSim = {
-                id: Date.now(), topic, numIAs, mode, history: [], customChar: null,
-                userCharName: null, isOmniscient: false, isFinished: false
+                id: Date.now(), topic, numIAs, mode, history: [],
+                isFinished: false, isSpectator: false, numChapters, generatedTitle: "", lang: currentLanguage
             };
 
             if (mode === 'create_char' || mode === 'dreame') {
-                currentSim.customChar = {
-                    name: customCharNameInput.value.trim() || "Personnage Principal",
-                    gender: customCharGenderInput.value,
-                    desc: customCharDescInput.value.trim()
-                };
+                const charName = dom.customCharNameInput.value.trim();
+                if (mode === 'dreame' && !charName) {
+                    currentSim.isSpectator = true;
+                } else {
+                    currentSim.customChar = {
+                        name: charName || t('charNamePlaceholder'),
+                        gender: dom.customCharGenderInput.value,
+                        desc: dom.customCharDescInput.value.trim()
+                    };
+                }
             }
             if (mode === 'dreame') {
-                currentSim.isOmniscient = dreameOmniCheckbox.checked;
+                currentSim.isOmniscient = dom.dreameOmniCheckbox.checked;
             }
             
             savedSimulations.unshift(currentSim);
-            saveSimulationsToStorage();
-            renderSimulationsList();
             
             showDebateScreen();
             await runSimulation();
         }
 
-        // --- LOGIQUE DE SIMULATION ---
         async function runSimulation() {
-            const { topic, numIAs, mode, customChar, history } = currentSim;
-            if (history.length > 0) return; // Ne pas relancer une simulation déjà commencée
+            if (currentSim.history.length > 0) return;
 
-            const personas = await generatePersonas(topic, numIAs, mode, customChar);
+            if (!currentSim.topic && currentSim.mode === 'dreame') {
+                const hookPrompt = `Invente un titre de roman accrocheur et mystérieux dans le style Dreame (ex: "Mon Alpha ne sera jamais à moi"). Réponds UNIQUEMENT avec le titre, dans la langue suivante: ${t('langCode')}.`;
+                currentSim.generatedTitle = await callGeminiAPI(hookPrompt);
+            }
+            
+            const personas = await generatePersonas();
             if (!personas) return;
             currentSim.personas = personas;
+            
+            saveSimulationsToStorage();
+            renderSimulationsList();
 
-             for (const profile of currentSim.personas) {
-                const prompt = `Tu es ${profile.name}. Ta personnalité est : '${profile.persona}'. Présente-toi en une phrase courte.`;
-                const response = await callGeminiAPI(prompt);
-                addMessageToHistory(profile, response);
-            }
-
-            if (mode === 'dreame') {
+            if (currentSim.mode === 'dreame') {
                 await runDreameMode();
             } else {
                 await runStandardMode();
             }
         }
 
-        async function runDreameMode() {
-            const { personas } = currentSim;
-            let userCharacter = personas.find(p => p.isUser);
-            if (!userCharacter) {
-                userCharacter = personas[Math.floor(Math.random() * personas.length)];
-                userCharacter.isUser = true;
-            }
-            currentSim.userCharName = userCharacter.name;
-
-            addMessageToHistory(USER_PROFILE, `Vous incarnez ${userCharacter.name}, ${userCharacter.role}.`);
-
-            for (let i = 0; i < 5; i++) { // 5 tours d'histoire
-                const storyPrompt = `Contexte de l'histoire:\n${getHistoryAsText()}\n\nEn tant que maître du jeu, continue l'histoire dans un style 'Dreame' (romance, tension, mystère). Décris la scène et présente 3 choix d'action clairs pour ${userCharacter.name}. Formatte les choix comme ceci : [CHOIX 1: ...], [CHOIX 2: ...], [CHOIX 3: ...].`;
-                const storyResponse = await callGeminiAPI(storyPrompt);
-                
-                const storyText = storyResponse.split('[CHOIX')[0];
-                addMessageToHistory(NARRATOR_PROFILE, storyText);
-
-                const choices = [...storyResponse.matchAll(/\[CHOIX \d: (.*?)\]/g)].map(m => m[1]);
-                if (choices.length === 0) { break; } // Fin de l'arc narratif
-                const userChoice = await waitForUserChoice(choices);
-                addMessageToHistory(USER_PROFILE, `Vous avez choisi : ${userChoice}`);
-
-                if (currentSim.isOmniscient) {
-                    for (const profile of personas) {
-                        if (profile.name !== userCharacter.name) {
-                            const reactionPrompt = `Contexte:\n${getHistoryAsText()}\n\nComment ${profile.name} (qui est complexe et pas facile à séduire) réagit-il/elle intérieurement à l'action de ${userCharacter.name} ? (une phrase)`;
-                            const reaction = await callGeminiAPI(reactionPrompt);
-                            addMessageToHistory(profile, `(Pensée) ${reaction}`);
-                        }
-                    }
+        async function runDreameMode(startIndex = 0) {
+            if (startIndex === 0) {
+                const userChar = currentSim.personas.find(p => p.isUser);
+                if (userChar) {
+                    await addMessageToHistory(USER_PROFILE, `${t('youAre')} ${userChar.name}.`);
+                } else {
+                     await addMessageToHistory(NARRATOR_PROFILE, t('spectatorMode'));
                 }
             }
-            finishSimulation("L'histoire est arrivée à une pause...");
+            
+            for (let i = Math.floor(startIndex / 2); i < currentSim.numChapters; i++) {
+                if(currentSim.isFinished) break;
+
+                await addMessageToHistory(CHAPTER_PROFILE, `${t('chaptersLabel')} ${i + 1}`);
+                
+                const historyText = getHistoryAsText();
+                let storyPrompt;
+                const userChar = currentSim.personas.find(p => p.isUser);
+
+                if (currentSim.isSpectator) {
+                    storyPrompt = `Contexte:\n${historyText}\n\nEn tant que maître du jeu, continue l'histoire de manière épique et émotionnelle pour ce chapitre. Décris la scène et les actions des personnages. Les actions des personnages doivent être à la 3ème personne (ex: "ses joues devinrent rouges", "il tendit la main"). Réponds en ${t('langCode')}.`;
+                } else {
+                    storyPrompt = `Contexte:\n${historyText}\n\nContinue l'histoire style 'Dreame' pour ce chapitre (romance, tension, mystère, émotions fortes). Décris la scène, y compris les actions et émotions entre parenthèses (ex: *Il serre les poings*). Les actions des personnages IA doivent être à la 3ème personne. Propose 3 choix prenants pour ${userChar.name}. Formatte les choix comme ceci : [CHOIX 1: ...], [CHOIX 2: ...], [CHOIX 3: ...]. Réponds en ${t('langCode')}.`;
+                }
+
+                const storyResponse = await callGeminiAPI(storyPrompt);
+                const storyText = storyResponse.split('[CHOIX')[0];
+                await addMessageToHistory(NARRATOR_PROFILE, storyText);
+
+                if (!currentSim.isSpectator) {
+                    const choices = [...storyResponse.matchAll(/\[CHOIX \d: (.*?)\]/g)].map(m => m[1]);
+                    if (choices.length === 0 || storyResponse.includes('[FIN]')) {
+                        await finishSimulation(t('unexpectedEnd'));
+                        break;
+                    }
+                    const userChoice = await waitForUserChoice(choices, currentSim.history.length);
+                    await addMessageToHistory(USER_PROFILE, userChoice);
+                }
+            }
+            if (!currentSim.isFinished) {
+                await finishSimulation(t('historyEnded'));
+            }
         }
 
         async function runStandardMode() {
-            for (let i = 0; i < 5; i++) {
+            for (const profile of currentSim.personas) {
+                if (profile.isUser) continue;
+                const prompt = `Contexte:\n${getHistoryAsText()}\n\nEn tant que ${profile.name} (${profile.persona}), quelle est ta première pensée ou action concernant le sujet "${currentSim.topic}"? Sois bref. Réponds en ${t('langCode')}.`;
+                const response = await callGeminiAPI(prompt);
+                await addMessageToHistory(profile, response);
+            }
+
+            const turns = currentSim.mode === 'acting' ? 3 : 5;
+            for (let i = 0; i < turns; i++) {
+                if (currentSim.isFinished) break;
+
                 if (currentSim.mode === 'narrator') {
-                    const narratorPrompt = `Contexte:\n${getHistoryAsText()}\n\nEn tant que narrateur, décris brièvement la scène.`;
+                    const narratorPrompt = `Contexte:\n${getHistoryAsText()}\n\nEn tant que narrateur, décris brièvement la scène ou l'atmosphère actuelle en une phrase. Réponds en ${t('langCode')}.`;
                     const narratorResponse = await callGeminiAPI(narratorPrompt);
-                    addMessageToHistory(NARRATOR_PROFILE, narratorResponse);
+                    await addMessageToHistory(NARRATOR_PROFILE, narratorResponse);
                 }
                 for (const profile of currentSim.personas) {
-                    const prompt = `Contexte:\n${getHistoryAsText()}\n\nC'est ton tour, ${profile.name}. Réagis en 1-2 phrases.`;
+                     if (profile.isUser) continue;
+                    let prompt = `Contexte:\n${getHistoryAsText()}\n\nC'est ton tour, ${profile.name}. `;
+                    if (currentSim.mode === 'acting') {
+                        prompt += `En tant que personnage '${profile.persona}', continue la scène avec une ou deux répliques.`;
+                    } else {
+                        prompt += `Réagis à la discussion en 1-2 phrases.`;
+                    }
+                    prompt += ` Réponds en ${t('langCode')}.`;
                     const response = await callGeminiAPI(prompt);
-                    addMessageToHistory(profile, response);
+                    await addMessageToHistory(profile, response);
                 }
             }
-            finishSimulation("La simulation est terminée.");
+            if (!currentSim.isFinished) {
+                await finishSimulation(t('historyEnded'));
+            }
         }
         
-        async function generatePersonas(topic, numIAs, mode, customChar) {
+        async function generatePersonas() {
+            const { topic, numIAs, mode, customChar, isSpectator, generatedTitle } = currentSim;
+            const finalTopic = topic || generatedTitle;
             let finalNumIAs = numIAs;
             let userCharPrompt = "";
-            if (customChar && customChar.name) {
+            if (customChar && !isSpectator) {
                 finalNumIAs = (mode === 'dreame') ? numIAs : numIAs - 1;
-                userCharPrompt = `L'un des personnages est l'utilisateur : Nom: ${customChar.name}, Sexe: ${customChar.gender}, Description: ${customChar.desc}. Intègre-le de manière centrale à l'histoire.`;
+                userCharPrompt = `L'un des personnages est l'utilisateur : Nom: ${customChar.name}, Sexe: ${customChar.gender}, Description: ${customChar.desc}. Intègre-le de manière centrale.`;
             }
             const personaTypes = {
-                dreame: `personnages pour une histoire de romance intense style 'Dreame' (ex: loup-garou, alpha, milliardaire). Ils doivent être complexes, avoir leurs propres secrets et ne pas être faciles à séduire.`
-                // ... autres modes
+                dreame: `personnages pour une histoire de romance intense style 'Dreame' (loup-garou, alpha, etc). Ils doivent être complexes, avoir leurs propres secrets et ne pas être faciles à séduire.`,
+                debate: "débatteurs uniques et créatifs aux opinions divergentes",
+                acting: "personnages pour une courte scène de théâtre",
+                narrator: "débatteurs avec des personnalités très marquées et un style de parole distinct",
+                create_char: "participants divers pour une discussion"
             };
-            const prompt = `Crée ${finalNumIAs} profils pour une simulation sur "${topic}" en mode "${mode}". ${userCharPrompt} Les personnages doivent être complexes et intéressants. Retourne un JSON valide.`;
+            const personaDescription = personaTypes[mode] || "participants";
+
+            const prompt = `Crée ${finalNumIAs} profils de ${personaDescription} pour une simulation sur "${finalTopic}". ${userCharPrompt}
+IMPORTANT: Ta réponse DOIT être uniquement un objet JSON valide, sans texte d'introduction, explications ou formatage markdown. La structure doit être une liste de ${finalNumIAs} objets.
+Chaque objet doit avoir les clés "name", "role", "icon" (un emoji), et "persona". Réponds en ${t('langCode')}.`;
             
             const responseText = await callGeminiAPI(prompt);
             try {
-                const jsonMatch = responseText.match(/\[.*\]/s);
-                let personas = JSON.parse(jsonMatch[0]);
-                if (customChar && customChar.name) {
+                let jsonString = responseText;
+                const markdownMatch = responseText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+                if (markdownMatch && markdownMatch[1]) {
+                    jsonString = markdownMatch[1];
+                } else {
+                    const startIndex = responseText.indexOf('[');
+                    const endIndex = responseText.lastIndexOf(']');
+                    if (startIndex !== -1 && endIndex !== -1) {
+                        jsonString = responseText.substring(startIndex, endIndex + 1);
+                    } else {
+                        throw new Error("Aucun tableau JSON trouvé dans la réponse de l'IA.");
+                    }
+                }
+
+                let personas = JSON.parse(jsonString);
+                if (customChar && !isSpectator) {
                     const userPersona = { name: customChar.name, role: "Protagoniste", icon: "👤", persona: customChar.desc, isUser: true };
                     personas.push(userPersona);
                 }
                 return personas;
             } catch (e) {
                 console.error("Erreur de parsing JSON:", e, "Réponse brute:", responseText);
-                errorMessage.textContent = "L'IA n'a pas pu créer les participants. Essayez un autre sujet.";
-                errorMessage.style.display = 'block';
+                dom.errorMessage.textContent = t('errorParticipants');
+                dom.errorMessage.style.display = 'block';
                 showSetupScreen();
                 return null;
             }
         }
 
-        // --- FONCTIONS HELPERS ---
-        function addMessageToHistory(profile, text) {
-            const message = { profile, text, timestamp: new Date() };
-            currentSim.history.push(message);
-            displayMessage(profile, text);
+        async function addMessageToHistory(profile, text, index = -1) {
+            while (isTyping) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            const message = { profile, text };
+            if (index === -1) {
+                currentSim.history.push(message);
+            } else {
+                currentSim.history.splice(index, currentSim.history.length - index, message);
+            }
+            await displayMessage(message, currentSim.history.length - 1);
             saveSimulationsToStorage();
         }
 
-        function finishSimulation(conclusionText) {
+        async function finishSimulation(conclusionText) {
+            if (currentSim.isFinished) return;
             currentSim.isFinished = true;
-            const finalPrompt = `La simulation est terminée. Historique:\n\n${getHistoryAsText()}\n\n Rédige une conclusion appropriée.`;
-            callGeminiAPI(finalPrompt).then(finalResponse => {
-                 addMessageToHistory({ name: "Conclusion", role: "Système", icon: "🏁" }, finalResponse);
-            });
+            const finalPrompt = `La simulation est terminée. Historique:\n\n${getHistoryAsText()}\n\n Rédige une conclusion appropriée et épique. Réponds en ${t('langCode')}.`;
+            const finalResponse = await callGeminiAPI(finalPrompt);
+            await addMessageToHistory({ name: t('conclusionTitle'), role: t('conclusionSystem'), icon: "🏁" }, finalResponse);
         }
 
-        async function waitForUserChoice(choices) {
+        async function waitForUserChoice(choices, index) {
             return new Promise(resolve => {
-                choicesContainer.innerHTML = '';
+                dom.choicesContainer.innerHTML = '';
                 choices.forEach(choiceText => {
                     const btn = document.createElement('button');
                     btn.className = 'choice-btn';
                     btn.textContent = choiceText;
                     btn.onclick = () => {
-                        choicesContainer.innerHTML = '';
+                        dom.choicesContainer.innerHTML = '';
                         resolve(choiceText);
                     };
-                    choicesContainer.appendChild(btn);
+                    dom.choicesContainer.appendChild(btn);
                 });
+
+                const customActionContainer = document.createElement('div');
+                customActionContainer.id = 'custom-action-container';
+                customActionContainer.innerHTML = `
+                    <input type="text" id="custom-action-input" class="input-group" placeholder="${t('customActionPlaceholder')}">
+                    <button id="custom-action-btn" class="choice-btn">${t('sendButton')}</button>
+                `;
+                dom.choicesContainer.appendChild(customActionContainer);
+
+                document.getElementById('custom-action-btn').onclick = () => {
+                    const customText = document.getElementById('custom-action-input').value.trim();
+                    if (customText) {
+                        dom.choicesContainer.innerHTML = '';
+                        resolve(customText);
+                    }
+                };
             });
+        }
+        
+        async function rewindHistory(index) {
+            currentSim.history.splice(index);
+            currentSim.isFinished = false;
+            loadSimulation(currentSim.id); 
+            
+            if (currentSim.mode === 'dreame') {
+                await runDreameMode(index);
+            }
         }
 
         async function callGeminiAPI(prompt) {
-            loader.style.display = 'block';
+            dom.loader.style.display = 'block';
             const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`;
             try {
                 const response = await fetch(API_URL, {
@@ -383,30 +709,28 @@
                         generationConfig: { temperature: 0.9, maxOutputTokens: 4096 }
                     })
                 });
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(`Erreur API: ${errorData.error.message}`);
-                }
+                if (!response.ok) throw new Error((await response.json()).error.message);
                 const data = await response.json();
                 return data.candidates[0].content.parts[0].text;
             } catch (error) {
-                console.error(error);
-                return `Une erreur est survenue : ${error.message}.`;
+                return `Erreur API: ${error.message}.`;
             } finally {
-                loader.style.display = 'none';
+                dom.loader.style.display = 'none';
             }
         }
 
         function typewriterEffect(element, text) {
             return new Promise(resolve => {
+                isTyping = true;
                 let i = 0;
                 function typing() {
                     if (i < text.length) {
-                        element.innerHTML += text.charAt(i);
+                        element.innerHTML += text.charAt(i).replace(/\n/g, '<br>');
                         i++;
-                        conversationDiv.scrollTop = conversationDiv.scrollHeight;
-                        setTimeout(typing, 20);
+                        dom.conversationDiv.scrollTop = dom.conversationDiv.scrollHeight;
+                        setTimeout(typing, 35);
                     } else {
+                        isTyping = false;
                         resolve();
                     }
                 }
@@ -414,61 +738,100 @@
             });
         }
 
-        async function displayMessage(profile, text) {
+        async function displayMessage(message, index) {
+            const { profile, text } = message;
             const messageEl = document.createElement('div');
             messageEl.className = 'message';
-            if (profile.name === 'Narrateur') {
-                messageEl.classList.add('narrator');
-            }
+            if (profile.name === NARRATOR_PROFILE.name) messageEl.classList.add('narrator');
+            if (profile.name === USER_PROFILE.name) messageEl.classList.add('user-choice');
+            if (profile.name === CHAPTER_PROFILE.name) messageEl.classList.add('chapter-break');
+
             messageEl.innerHTML = `
                 <div class="icon">${profile.icon}</div>
                 <div class="content">
-                    <strong>${profile.name} (${profile.role})</strong>
-                    <p></p>
+                    <strong>${profile.name === CHAPTER_PROFILE.name ? '' : profile.name} ${profile.role && profile.name !== CHAPTER_PROFILE.name ? `(${profile.role})` : ''}</strong>
+                    <p>${profile.name === CHAPTER_PROFILE.name ? `--- ${text} ---` : ''}</p>
                 </div>
             `;
-            conversationDiv.appendChild(messageEl);
+            if (profile.name === USER_PROFILE.name && currentSim.mode === 'dreame') {
+                const rewindBtn = document.createElement('button');
+                rewindBtn.className = 'rewind-btn';
+                rewindBtn.innerHTML = '&#8634;';
+                rewindBtn.title = 'Modifier ce choix';
+                rewindBtn.onclick = () => rewindHistory(index);
+                messageEl.appendChild(rewindBtn);
+            }
+            dom.conversationDiv.appendChild(messageEl);
             const p = messageEl.querySelector('p');
-            await typewriterEffect(p, text);
+            if (profile.name !== CHAPTER_PROFILE.name) {
+                await typewriterEffect(p, text);
+            }
         }
         
-        // --- GESTION DE L'UI ET DU STOCKAGE ---
         function showSetupScreen() {
-            debateScreen.classList.add('hidden');
-            setupScreen.classList.remove('hidden');
+            dom.debateScreen.classList.add('hidden');
+            dom.setupScreen.classList.remove('hidden');
             currentSim = null;
             renderSimulationsList();
         }
 
         function showDebateScreen() {
-            setupScreen.classList.add('hidden');
-            debateScreen.classList.remove('hidden');
-            debateTitle.textContent = `${currentSim.mode} : ${currentSim.topic}`;
-            conversationDiv.innerHTML = '';
+            dom.setupScreen.classList.add('hidden');
+            dom.debateScreen.classList.remove('hidden');
+            const title = currentSim.topic || currentSim.generatedTitle;
+            const modeName = t(`mode${currentSim.mode.charAt(0).toUpperCase() + currentSim.mode.slice(1)}`);
+            dom.debateTitle.textContent = `[${modeName}] ${title}`;
+            dom.conversationDiv.innerHTML = '';
         }
 
         function loadSimulation(id) {
             const sim = savedSimulations.find(s => s.id === id);
             if (!sim) return;
             currentSim = sim;
+            currentLanguage = sim.lang || 'fr'; // Load language from sim
+            dom.languageSwitcher.value = currentLanguage;
+            updateUIText();
             showDebateScreen();
-            conversationDiv.innerHTML = ''; // Clear before loading
-            sim.history.forEach(msg => {
+            dom.conversationDiv.innerHTML = '';
+            sim.history.forEach((msg, index) => {
                 const messageEl = document.createElement('div');
                 messageEl.className = 'message';
-                 if (msg.profile.name === 'Narrateur') messageEl.classList.add('narrator');
-                messageEl.style.opacity = 1; // No fade-in for loaded messages
+                if (msg.profile.name === NARRATOR_PROFILE.name) messageEl.classList.add('narrator');
+                if (msg.profile.name === USER_PROFILE.name) messageEl.classList.add('user-choice');
+                if (msg.profile.name === CHAPTER_PROFILE.name) messageEl.classList.add('chapter-break');
+                messageEl.style.opacity = 1;
                 messageEl.style.transform = 'none';
                 messageEl.innerHTML = `
                     <div class="icon">${msg.profile.icon}</div>
                     <div class="content">
-                        <strong>${msg.profile.name} (${msg.profile.role})</strong>
-                        <p>${msg.text}</p>
+                        <strong>${msg.profile.name === CHAPTER_PROFILE.name ? '' : msg.profile.name} ${msg.profile.role && msg.profile.name !== CHAPTER_PROFILE.name ? `(${msg.profile.role})` : ''}</strong>
+                        <p>${msg.profile.name === CHAPTER_PROFILE.name ? `--- ${msg.text} ---` : msg.text.replace(/\n/g, '<br>')}</p>
                     </div>`;
-                conversationDiv.appendChild(messageEl);
+                if (msg.profile.name === USER_PROFILE.name && sim.mode === 'dreame' && !sim.isFinished) {
+                    const rewindBtn = document.createElement('button');
+                    rewindBtn.className = 'rewind-btn';
+                    rewindBtn.innerHTML = '&#8634;';
+                    rewindBtn.title = 'Modifier ce choix';
+                    rewindBtn.onclick = () => rewindHistory(index);
+                    messageEl.appendChild(rewindBtn);
+                }
+                dom.conversationDiv.appendChild(messageEl);
             });
+            dom.choicesContainer.innerHTML = '';
             if (sim.isFinished) {
-                 choicesContainer.innerHTML = '';
+                dom.choicesContainer.innerHTML = `<p>${t('historyEnded')}</p>`;
+            } else if (sim.mode === 'dreame' && !sim.isSpectator) {
+                runDreameMode(sim.history.length);
+            }
+            renderSimulationsList();
+        }
+        
+        function deleteSimulation(id, event) {
+            event.stopPropagation();
+            savedSimulations = savedSimulations.filter(s => s.id !== id);
+            saveSimulationsToStorage();
+            if (currentSim && currentSim.id === id) {
+                showSetupScreen();
             }
             renderSimulationsList();
         }
@@ -476,9 +839,7 @@
         function saveSimulationsToStorage() {
             if (currentSim) {
                 const index = savedSimulations.findIndex(s => s.id === currentSim.id);
-                if (index !== -1) {
-                    savedSimulations[index] = currentSim;
-                }
+                if (index !== -1) savedSimulations[index] = currentSim;
             }
             localStorage.setItem('iaSimulations', JSON.stringify(savedSimulations));
         }
@@ -489,16 +850,25 @@
         }
 
         function renderSimulationsList() {
-            savedSimsList.innerHTML = '';
+            dom.savedSimsList.innerHTML = '';
             savedSimulations.forEach(sim => {
                 const li = document.createElement('li');
-                li.textContent = `[${sim.mode}] ${sim.topic}`;
                 li.dataset.id = sim.id;
-                if (currentSim && sim.id === currentSim.id) {
-                    li.classList.add('active');
-                }
+                if (currentSim && sim.id === currentSim.id) li.classList.add('active');
+                
+                const textSpan = document.createElement('span');
+                const modeName = translations[sim.lang || 'fr'][`mode${sim.mode.charAt(0).toUpperCase() + sim.mode.slice(1)}`];
+                textSpan.textContent = `[${modeName}] ${sim.topic || sim.generatedTitle}`;
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-sim-btn';
+                deleteBtn.innerHTML = '&times;';
+                deleteBtn.onclick = (e) => deleteSimulation(sim.id, e);
+                
+                li.appendChild(textSpan);
+                li.appendChild(deleteBtn);
                 li.onclick = () => loadSimulation(sim.id);
-                savedSimsList.appendChild(li);
+                dom.savedSimsList.appendChild(li);
             });
         }
 
@@ -506,7 +876,6 @@
             return currentSim.history.map(msg => `${msg.profile.name}: ${msg.text}`).join('\n');
         }
 
-        // Démarrage
         initialize();
     </script>
 </body>
