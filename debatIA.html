@@ -3,201 +3,377 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulateur de Débat d'IA à Personas Dynamiques</title>
+    <title>Simulateur d'Histoires et Débats d'IA</title>
     <style>
         :root {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --text-color: #e0e0e0;
-            --primary-color: #bb86fc;
-            --border-color: #333;
-            --shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            --bg-color: #121212; --card-bg: #1e1e1e; --text-color: #e0e0e0;
+            --primary-color: #bb86fc; --border-color: #333; --shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            background-color: var(--bg-color); color: var(--text-color); margin: 0;
+            display: flex; height: 100vh;
         }
+        #sidebar {
+            width: 250px; background-color: #181818; padding: 20px;
+            display: flex; flex-direction: column; border-right: 1px solid var(--border-color);
+        }
+        #sidebar h2 { color: var(--primary-color); margin-top: 0; }
+        #saved-simulations { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex-grow: 1; }
+        #saved-simulations li {
+            padding: 10px; margin-bottom: 10px; border-radius: 8px; cursor: pointer;
+            background-color: #2c2c2c; transition: background-color 0.3s; white-space: nowrap;
+            overflow: hidden; text-overflow: ellipsis;
+        }
+        #saved-simulations li:hover, #saved-simulations li.active { background-color: var(--primary-color); color: #000; }
+        #new-sim-btn {
+            padding: 12px; background-color: var(--primary-color); color: #000; border: none;
+            border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 20px;
+        }
+        .main-content { flex-grow: 1; display: flex; justify-content: center; align-items: center; padding: 20px; }
         .container {
-            width: 100%;
-            max-width: 800px;
-            background: var(--card-bg);
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            overflow: hidden;
+            width: 100%; max-width: 800px; background: var(--card-bg);
+            border-radius: 12px; box-shadow: var(--shadow); overflow: hidden;
             border: 1px solid var(--border-color);
         }
-        .setup-screen, .debate-screen {
-            padding: 30px;
-        }
-        h1, h2 {
-            text-align: center;
-            color: var(--primary-color);
-            margin-bottom: 20px;
-        }
-        .input-group {
-            margin-bottom: 20px;
-        }
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #b0b0b0;
-        }
-        .input-group input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            background-color: #2c2c2c;
-            color: var(--text-color);
-            border-radius: 8px;
-            font-size: 16px;
-            box-sizing: border-box;
+        .setup-screen, .debate-screen { padding: 30px; }
+        h1, h2 { text-align: center; color: var(--primary-color); margin-bottom: 20px; }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #b0b0b0; }
+        .input-group input, .input-group select, .input-group textarea {
+            width: 100%; padding: 12px; border: 1px solid var(--border-color);
+            background-color: #2c2c2c; color: var(--text-color); border-radius: 8px;
+            font-size: 16px; box-sizing: border-box; font-family: inherit;
         }
         .btn {
-            display: block;
-            width: 100%;
-            padding: 14px;
-            background-color: var(--primary-color);
-            color: #000;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s;
+            display: block; width: 100%; padding: 14px; background-color: var(--primary-color);
+            color: #000; border: none; border-radius: 8px; font-size: 18px;
+            font-weight: bold; cursor: pointer; transition: background-color 0.3s;
         }
-        .btn:hover {
-            background-color: #a764fa;
-        }
-        .btn:disabled {
-            background-color: #555;
-            cursor: not-allowed;
-        }
-        #conversation {
-            margin-top: 20px;
-            max-height: 60vh;
-            overflow-y: auto;
-            padding-right: 15px;
-        }
+        #conversation { margin-top: 20px; max-height: 60vh; overflow-y: auto; padding-right: 15px; }
         .message {
-            margin-bottom: 15px;
-            padding: 12px;
-            border-radius: 18px;
-            line-height: 1.4;
-            display: flex;
-            align-items: flex-start;
-            background-color: #2c2c2c;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeIn 0.5s forwards;
+            margin-bottom: 15px; padding: 12px; border-radius: 18px; line-height: 1.4;
+            display: flex; align-items: flex-start; background-color: #2c2c2c;
+            opacity: 0; transform: translateY(20px); animation: fadeIn 0.5s forwards;
         }
-        @keyframes fadeIn {
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .message .icon {
-            font-size: 24px;
-            margin-right: 12px;
-        }
+        .narrator { background-color: transparent; border: 1px dashed #666; font-style: italic; color: #aaa; }
+        .user-choice { background-color: rgba(187, 134, 252, 0.2); text-align: center; font-style: italic; }
+        @keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+        .message .icon { font-size: 24px; margin-right: 12px; }
         .message .content { flex: 1; }
         .message strong { display: block; margin-bottom: 4px; color: var(--primary-color); }
         .message p { margin: 0; }
         .final-summary { background-color: rgba(187, 134, 252, 0.1); padding: 20px; border: 1px solid var(--primary-color); border-radius: 8px; margin-top: 20px;}
         #loader { text-align: center; padding: 20px; display: none; }
         .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            border-left-color: var(--primary-color);
-            animation: spin 1s ease infinite;
-            margin: auto;
+            border: 4px solid rgba(255, 255, 255, 0.1); width: 36px; height: 36px;
+            border-radius: 50%; border-left-color: var(--primary-color);
+            animation: spin 1s ease infinite; margin: auto;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         #error-message { color: #cf6679; text-align: center; margin-top: 10px; display: none; }
+        .hidden { display: none; }
+        #choices-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
+        .choice-btn {
+            padding: 10px 15px; background-color: #2c2c2c; border: 1px solid var(--primary-color);
+            color: var(--primary-color); border-radius: 20px; cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="setup-screen" id="setupScreen">
-            <h1>Simulateur de Débat d'IA</h1>
-            <p style="text-align:center; color: #b0b0b0;">L'IA crée les débatteurs en fonction de votre sujet.</p>
-            <div class="input-group">
-                <label for="topic">Sujet du Débat</label>
-                <input type="text" id="topic" placeholder="Ex : La pokemon la plus fort...">
-            </div>
-            <div class="input-group">
-                <label for="numIAs">Nombre de Débatteurs (2-6)</label>
-                <input type="number" id="numIAs" value="4" min="2" max="6" style="-moz-appearance: textfield;">
-            </div>
-            <button class="btn" id="startButton">Lancer le Débat</button>
-            <p id="error-message"></p>
-        </div>
+    <div id="sidebar">
+        <h2>Mes Simulations</h2>
+        <ul id="saved-simulations"></ul>
+        <button id="new-sim-btn">Nouvelle Simulation</button>
+    </div>
 
-        <div class="debate-screen" id="debateScreen" style="display:none;">
-            <h2 id="debateTitle"></h2>
-            <div id="conversation"></div>
-            <div id="loader">
-                <div class="spinner"></div>
-                <p>IA en cours de réflexion...</p>
+    <div class="main-content">
+        <div class="container">
+            <div class="setup-screen" id="setupScreen">
+                <h1>Nouvelle Simulation</h1>
+                <div class="input-group">
+                    <label for="topic">Sujet</label>
+                    <input type="text" id="topic" placeholder="Ex: Romance avec un Alpha mystérieux">
+                </div>
+                <div class="input-group">
+                    <label for="simulationMode">Mode de Simulation</label>
+                    <select id="simulationMode">
+                        <option value="debate">Débat Classique</option>
+                        <option value="acting">Jeu d'acteur</option>
+                        <option value="narrator">Débat avec Narrateur</option>
+                        <option value="brainstorming">Brainstorming</option>
+                        <option value="trial">Procès Fictif</option>
+                        <option value="negotiation">Négociation</option>
+                        <option value="interview">Interview d'Expert</option>
+                        <option value="create_char">Création Personnage</option>
+                        <option value="dreame">Histoire Interactive (Dreame)</option>
+                    </select>
+                </div>
+                <div id="custom-char-group" class="input-group hidden">
+                    <label for="custom-char-name">Nom de votre Personnage</label>
+                    <input type="text" id="custom-char-name">
+                    <label for="custom-char-gender" style="margin-top:10px;">Sexe</label>
+                    <select id="custom-char-gender">
+                        <option value="Fille">Fille</option>
+                        <option value="Garçon">Garçon</option>
+                    </select>
+                    <label for="custom-char-desc" style="margin-top:10px;">Description</label>
+                    <textarea id="custom-char-desc" rows="3" placeholder="Ex: Timide mais courageuse, avec un passé secret..."></textarea>
+                </div>
+                 <div id="dreame-options-group" class="input-group hidden">
+                    <label><input type="checkbox" id="dreame-omni"> Vue Omnisciente (voir les pensées des autres)</label>
+                </div>
+                <div class="input-group" id="num-ias-group">
+                    <label for="numIAs">Nombre de Participants IA (2-6)</label>
+                    <input type="number" id="numIAs" value="4" min="2" max="6">
+                </div>
+                <button class="btn" id="startButton">Lancer la Simulation</button>
+                <p id="error-message"></p>
+            </div>
+
+            <div class="debate-screen hidden" id="debateScreen">
+                <h2 id="debateTitle"></h2>
+                <div id="conversation"></div>
+                <div id="choices-container"></div>
+                <div id="loader">
+                    <div class="spinner"></div>
+                    <p>IA en cours de réflexion...</p>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
+        // --- ELEMENTS DOM ---
         const startButton = document.getElementById('startButton');
         const topicInput = document.getElementById('topic');
         const numIAsInput = document.getElementById('numIAs');
+        const numIAsGroup = document.getElementById('num-ias-group');
+        const modeInput = document.getElementById('simulationMode');
         const setupScreen = document.getElementById('setupScreen');
         const debateScreen = document.getElementById('debateScreen');
         const conversationDiv = document.getElementById('conversation');
         const loader = document.getElementById('loader');
         const debateTitle = document.getElementById('debateTitle');
         const errorMessage = document.getElementById('error-message');
+        const customCharGroup = document.getElementById('custom-char-group');
+        const customCharNameInput = document.getElementById('custom-char-name');
+        const customCharGenderInput = document.getElementById('custom-char-gender');
+        const customCharDescInput = document.getElementById('custom-char-desc');
+        const dreameOptionsGroup = document.getElementById('dreame-options-group');
+        const dreameOmniCheckbox = document.getElementById('dreame-omni');
+        const choicesContainer = document.getElementById('choices-container');
+        const savedSimsList = document.getElementById('saved-simulations');
+        const newSimBtn = document.getElementById('new-sim-btn');
 
-        // --- Clé API directement intégrée ici ---
+        // --- ETAT DE L'APPLICATION ---
         const geminiApiKey = "AIzaSyAQYBigpd1Yvbrc-gz12jVROUKH1p2pKDY";
-        
-        let conversationHistory = "";
-        let dynamicProfiles = [];
+        let savedSimulations = [];
+        let currentSim = null;
+        const NARRATOR_PROFILE = { name: "Narrateur", role: "Omniscient", icon: "📖", persona: "..." };
+        const USER_PROFILE = { name: "Vous", role: "Protagoniste", icon: "👤" };
 
-        startButton.addEventListener('click', async () => {
+        // --- INITIALISATION ---
+        function initialize() {
+            loadSimulationsFromStorage();
+            renderSimulationsList();
+            if (savedSimulations.length > 0) {
+                loadSimulation(savedSimulations[0].id);
+            } else {
+                showSetupScreen();
+            }
+            updateUIForMode();
+        }
+
+        // --- GESTION DES EVENEMENTS ---
+        modeInput.addEventListener('change', updateUIForMode);
+        newSimBtn.addEventListener('click', showSetupScreen);
+        startButton.addEventListener('click', startNewSimulation);
+
+        function updateUIForMode() {
+            const mode = modeInput.value;
+            customCharGroup.classList.toggle('hidden', mode !== 'create_char' && mode !== 'dreame');
+            dreameOptionsGroup.classList.toggle('hidden', mode !== 'dreame');
+            numIAsGroup.classList.toggle('hidden', mode === 'dreame');
+        }
+
+        async function startNewSimulation() {
             const topic = topicInput.value.trim();
-            const numIAs = parseInt(numIAsInput.value, 10);
+            const mode = modeInput.value;
+            const numIAs = (mode === 'dreame') ? 3 : parseInt(numIAsInput.value, 10); // Dreame a un nombre fixe d'IA
 
             if (!topic) {
                 errorMessage.textContent = "Veuillez fournir un sujet.";
                 errorMessage.style.display = 'block';
                 return;
             }
-            if (isNaN(numIAs) || numIAs < 2 || numIAs > 6) {
-                errorMessage.textContent = "Veuillez choisir un nombre de débatteurs entre 2 et 6.";
-                errorMessage.style.display = 'block';
-                return;
-            }
             errorMessage.style.display = 'none';
+
+            currentSim = {
+                id: Date.now(), topic, numIAs, mode, history: [], customChar: null,
+                userCharName: null, isOmniscient: false, isFinished: false
+            };
+
+            if (mode === 'create_char' || mode === 'dreame') {
+                currentSim.customChar = {
+                    name: customCharNameInput.value.trim() || "Personnage Principal",
+                    gender: customCharGenderInput.value,
+                    desc: customCharDescInput.value.trim()
+                };
+            }
+            if (mode === 'dreame') {
+                currentSim.isOmniscient = dreameOmniCheckbox.checked;
+            }
             
-            setupScreen.style.display = 'none';
-            debateScreen.style.display = 'block';
-            debateTitle.textContent = `Débat : ${topic}`;
+            savedSimulations.unshift(currentSim);
+            saveSimulationsToStorage();
+            renderSimulationsList();
             
-            await runDebate(topic, numIAs);
-        });
+            showDebateScreen();
+            await runSimulation();
+        }
+
+        // --- LOGIQUE DE SIMULATION ---
+        async function runSimulation() {
+            const { topic, numIAs, mode, customChar, history } = currentSim;
+            if (history.length > 0) return; // Ne pas relancer une simulation déjà commencée
+
+            const personas = await generatePersonas(topic, numIAs, mode, customChar);
+            if (!personas) return;
+            currentSim.personas = personas;
+
+             for (const profile of currentSim.personas) {
+                const prompt = `Tu es ${profile.name}. Ta personnalité est : '${profile.persona}'. Présente-toi en une phrase courte.`;
+                const response = await callGeminiAPI(prompt);
+                addMessageToHistory(profile, response);
+            }
+
+            if (mode === 'dreame') {
+                await runDreameMode();
+            } else {
+                await runStandardMode();
+            }
+        }
+
+        async function runDreameMode() {
+            const { personas } = currentSim;
+            let userCharacter = personas.find(p => p.isUser);
+            if (!userCharacter) {
+                userCharacter = personas[Math.floor(Math.random() * personas.length)];
+                userCharacter.isUser = true;
+            }
+            currentSim.userCharName = userCharacter.name;
+
+            addMessageToHistory(USER_PROFILE, `Vous incarnez ${userCharacter.name}, ${userCharacter.role}.`);
+
+            for (let i = 0; i < 5; i++) { // 5 tours d'histoire
+                const storyPrompt = `Contexte de l'histoire:\n${getHistoryAsText()}\n\nEn tant que maître du jeu, continue l'histoire dans un style 'Dreame' (romance, tension, mystère). Décris la scène et présente 3 choix d'action clairs pour ${userCharacter.name}. Formatte les choix comme ceci : [CHOIX 1: ...], [CHOIX 2: ...], [CHOIX 3: ...].`;
+                const storyResponse = await callGeminiAPI(storyPrompt);
+                
+                const storyText = storyResponse.split('[CHOIX')[0];
+                addMessageToHistory(NARRATOR_PROFILE, storyText);
+
+                const choices = [...storyResponse.matchAll(/\[CHOIX \d: (.*?)\]/g)].map(m => m[1]);
+                if (choices.length === 0) { break; } // Fin de l'arc narratif
+                const userChoice = await waitForUserChoice(choices);
+                addMessageToHistory(USER_PROFILE, `Vous avez choisi : ${userChoice}`);
+
+                if (currentSim.isOmniscient) {
+                    for (const profile of personas) {
+                        if (profile.name !== userCharacter.name) {
+                            const reactionPrompt = `Contexte:\n${getHistoryAsText()}\n\nComment ${profile.name} (qui est complexe et pas facile à séduire) réagit-il/elle intérieurement à l'action de ${userCharacter.name} ? (une phrase)`;
+                            const reaction = await callGeminiAPI(reactionPrompt);
+                            addMessageToHistory(profile, `(Pensée) ${reaction}`);
+                        }
+                    }
+                }
+            }
+            finishSimulation("L'histoire est arrivée à une pause...");
+        }
+
+        async function runStandardMode() {
+            for (let i = 0; i < 5; i++) {
+                if (currentSim.mode === 'narrator') {
+                    const narratorPrompt = `Contexte:\n${getHistoryAsText()}\n\nEn tant que narrateur, décris brièvement la scène.`;
+                    const narratorResponse = await callGeminiAPI(narratorPrompt);
+                    addMessageToHistory(NARRATOR_PROFILE, narratorResponse);
+                }
+                for (const profile of currentSim.personas) {
+                    const prompt = `Contexte:\n${getHistoryAsText()}\n\nC'est ton tour, ${profile.name}. Réagis en 1-2 phrases.`;
+                    const response = await callGeminiAPI(prompt);
+                    addMessageToHistory(profile, response);
+                }
+            }
+            finishSimulation("La simulation est terminée.");
+        }
+        
+        async function generatePersonas(topic, numIAs, mode, customChar) {
+            let finalNumIAs = numIAs;
+            let userCharPrompt = "";
+            if (customChar && customChar.name) {
+                finalNumIAs = (mode === 'dreame') ? numIAs : numIAs - 1;
+                userCharPrompt = `L'un des personnages est l'utilisateur : Nom: ${customChar.name}, Sexe: ${customChar.gender}, Description: ${customChar.desc}. Intègre-le de manière centrale à l'histoire.`;
+            }
+            const personaTypes = {
+                dreame: `personnages pour une histoire de romance intense style 'Dreame' (ex: loup-garou, alpha, milliardaire). Ils doivent être complexes, avoir leurs propres secrets et ne pas être faciles à séduire.`
+                // ... autres modes
+            };
+            const prompt = `Crée ${finalNumIAs} profils pour une simulation sur "${topic}" en mode "${mode}". ${userCharPrompt} Les personnages doivent être complexes et intéressants. Retourne un JSON valide.`;
+            
+            const responseText = await callGeminiAPI(prompt);
+            try {
+                const jsonMatch = responseText.match(/\[.*\]/s);
+                let personas = JSON.parse(jsonMatch[0]);
+                if (customChar && customChar.name) {
+                    const userPersona = { name: customChar.name, role: "Protagoniste", icon: "👤", persona: customChar.desc, isUser: true };
+                    personas.push(userPersona);
+                }
+                return personas;
+            } catch (e) {
+                console.error("Erreur de parsing JSON:", e, "Réponse brute:", responseText);
+                errorMessage.textContent = "L'IA n'a pas pu créer les participants. Essayez un autre sujet.";
+                errorMessage.style.display = 'block';
+                showSetupScreen();
+                return null;
+            }
+        }
+
+        // --- FONCTIONS HELPERS ---
+        function addMessageToHistory(profile, text) {
+            const message = { profile, text, timestamp: new Date() };
+            currentSim.history.push(message);
+            displayMessage(profile, text);
+            saveSimulationsToStorage();
+        }
+
+        function finishSimulation(conclusionText) {
+            currentSim.isFinished = true;
+            const finalPrompt = `La simulation est terminée. Historique:\n\n${getHistoryAsText()}\n\n Rédige une conclusion appropriée.`;
+            callGeminiAPI(finalPrompt).then(finalResponse => {
+                 addMessageToHistory({ name: "Conclusion", role: "Système", icon: "🏁" }, finalResponse);
+            });
+        }
+
+        async function waitForUserChoice(choices) {
+            return new Promise(resolve => {
+                choicesContainer.innerHTML = '';
+                choices.forEach(choiceText => {
+                    const btn = document.createElement('button');
+                    btn.className = 'choice-btn';
+                    btn.textContent = choiceText;
+                    btn.onclick = () => {
+                        choicesContainer.innerHTML = '';
+                        resolve(choiceText);
+                    };
+                    choicesContainer.appendChild(btn);
+                });
+            });
+        }
 
         async function callGeminiAPI(prompt) {
             loader.style.display = 'block';
             const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`;
-            
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
@@ -207,12 +383,10 @@
                         generationConfig: { temperature: 0.9, maxOutputTokens: 4096 }
                     })
                 });
-
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(`Erreur API: ${errorData.error.message}`);
                 }
-
                 const data = await response.json();
                 return data.candidates[0].content.parts[0].text;
             } catch (error) {
@@ -243,7 +417,9 @@
         async function displayMessage(profile, text) {
             const messageEl = document.createElement('div');
             messageEl.className = 'message';
-            
+            if (profile.name === 'Narrateur') {
+                messageEl.classList.add('narrator');
+            }
             messageEl.innerHTML = `
                 <div class="icon">${profile.icon}</div>
                 <div class="content">
@@ -255,68 +431,83 @@
             const p = messageEl.querySelector('p');
             await typewriterEffect(p, text);
         }
-
-        async function generatePersonas(topic, numIAs) {
-            const prompt = `En te basant sur le sujet de débat suivant : "${topic}", crée ${numIAs} profils de débatteurs uniques et créatifs. Retourne le résultat sous forme d'un objet JSON valide (une liste de ${numIAs} objets). Chaque objet doit avoir les clés "name", "role", "icon" (un emoji), et "persona".`;
-            const responseText = await callGeminiAPI(prompt);
-            try {
-                const jsonMatch = responseText.match(/\[.*\]/s);
-                if (!jsonMatch) throw new Error("Format JSON non valide reçu de l'IA.");
-                const personas = JSON.parse(jsonMatch[0]);
-                return personas;
-            } catch (e) {
-                console.error("Erreur de parsing JSON:", e, "Réponse brute:", responseText);
-                errorMessage.textContent = "L'IA n'a pas pu créer les débatteurs. Essayez un autre sujet.";
-                errorMessage.style.display = 'block';
-                // Retour à l'écran de configuration
-                setupScreen.style.display = 'block';
-                debateScreen.style.display = 'none';
-                return null;
-            }
+        
+        // --- GESTION DE L'UI ET DU STOCKAGE ---
+        function showSetupScreen() {
+            debateScreen.classList.add('hidden');
+            setupScreen.classList.remove('hidden');
+            currentSim = null;
+            renderSimulationsList();
         }
 
-        async function runDebate(topic, numIAs) {
-            conversationHistory = `Sujet du débat : ${topic}\n\n`;
-            
-            // Étape 0: Génération des personas
-            dynamicProfiles = await generatePersonas(topic, numIAs);
-            if (!dynamicProfiles) return;
+        function showDebateScreen() {
+            setupScreen.classList.add('hidden');
+            debateScreen.classList.remove('hidden');
+            debateTitle.textContent = `${currentSim.mode} : ${currentSim.topic}`;
+            conversationDiv.innerHTML = '';
+        }
 
-            // Étape 1: Présentations
-            for (const profile of dynamicProfiles) {
-                const prompt = `Tu es ${profile.name}. Ta personnalité est : '${profile.persona}'. Présente-toi en une phrase courte et percutante.`;
-                const response = await callGeminiAPI(prompt);
-                await displayMessage(profile, response);
-                conversationHistory += `${profile.name}: ${response}\n`;
+        function loadSimulation(id) {
+            const sim = savedSimulations.find(s => s.id === id);
+            if (!sim) return;
+            currentSim = sim;
+            showDebateScreen();
+            conversationDiv.innerHTML = ''; // Clear before loading
+            sim.history.forEach(msg => {
+                const messageEl = document.createElement('div');
+                messageEl.className = 'message';
+                 if (msg.profile.name === 'Narrateur') messageEl.classList.add('narrator');
+                messageEl.style.opacity = 1; // No fade-in for loaded messages
+                messageEl.style.transform = 'none';
+                messageEl.innerHTML = `
+                    <div class="icon">${msg.profile.icon}</div>
+                    <div class="content">
+                        <strong>${msg.profile.name} (${msg.profile.role})</strong>
+                        <p>${msg.text}</p>
+                    </div>`;
+                conversationDiv.appendChild(messageEl);
+            });
+            if (sim.isFinished) {
+                 choicesContainer.innerHTML = '';
             }
+            renderSimulationsList();
+        }
 
-            // Étape 2: Idées initiales
-            for (const profile of dynamicProfiles) {
-                 const prompt = `Contexte: ${conversationHistory}\n\nEn tant que ${profile.name} (${profile.persona}), propose ta solution initiale pour le sujet : '${topic}'. Sois bref, en 2 ou 3 phrases maximum.`;
-                 const response = await callGeminiAPI(prompt);
-                 await displayMessage(profile, response);
-                 conversationHistory += `Idée de ${profile.name}: ${response}\n`;
-            }
-
-            // Étape 3: Débat
-            for (let i = 0; i < 5; i++) {
-                for (const profile of dynamicProfiles) {
-                    const prompt = `Contexte:\n${conversationHistory}\n\nC'est ton tour, ${profile.name}. En tant que personnage avec la personnalité '${profile.persona}', réagis à la discussion en une ou deux phrases. Sois direct et concis.`;
-                    const response = await callGeminiAPI(prompt);
-                    await displayMessage(profile, response);
-                    conversationHistory += `Réaction de ${profile.name}: ${response}\n`;
+        function saveSimulationsToStorage() {
+            if (currentSim) {
+                const index = savedSimulations.findIndex(s => s.id === currentSim.id);
+                if (index !== -1) {
+                    savedSimulations[index] = currentSim;
                 }
             }
-
-            // Étape 4: Synthèse
-            const finalPrompt = `Le débat est terminé. Historique:\n\n${conversationHistory}\n\nEn tant qu'orchestrateur neutre, rédige une proposition finale optimisée.`;
-            const finalResponse = await callGeminiAPI(finalPrompt);
-            const summaryEl = document.createElement('div');
-            summaryEl.className = 'final-summary';
-            summaryEl.innerHTML = `<h3>Synthèse Finale</h3><p>${finalResponse.replace(/\n/g, '<br>')}</p>`;
-            conversationDiv.appendChild(summaryEl);
-            conversationDiv.scrollTop = conversationDiv.scrollHeight;
+            localStorage.setItem('iaSimulations', JSON.stringify(savedSimulations));
         }
+
+        function loadSimulationsFromStorage() {
+            const stored = localStorage.getItem('iaSimulations');
+            savedSimulations = stored ? JSON.parse(stored) : [];
+        }
+
+        function renderSimulationsList() {
+            savedSimsList.innerHTML = '';
+            savedSimulations.forEach(sim => {
+                const li = document.createElement('li');
+                li.textContent = `[${sim.mode}] ${sim.topic}`;
+                li.dataset.id = sim.id;
+                if (currentSim && sim.id === currentSim.id) {
+                    li.classList.add('active');
+                }
+                li.onclick = () => loadSimulation(sim.id);
+                savedSimsList.appendChild(li);
+            });
+        }
+
+        function getHistoryAsText() {
+            return currentSim.history.map(msg => `${msg.profile.name}: ${msg.text}`).join('\n');
+        }
+
+        // Démarrage
+        initialize();
     </script>
 </body>
 </html>
